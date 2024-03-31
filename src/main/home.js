@@ -1,92 +1,82 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState, PureComponent } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
     StyleSheet, Text, View, TextInput, FlatList, ActivityIndicator,
-    RefreshControl, ScrollView, TouchableOpacity, Image
+    RefreshControl, ScrollView, TouchableOpacity, Platform, Image
 } from 'react-native';
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios'
+// import { Image } from 'expo-image';
+import RenderImage from '../helpers/list'
 
-class CosmeticItem extends PureComponent {
-    render() {
-
-        const getRarityPath = (rarity) => {
-            const rarityLower = rarity.toLowerCase();
-            switch (rarityLower) {
-                case 'cubeseries':
-                    return require('../../assets/cosmetics/rarities/dark.png');
-                case 'frozenseries':
-                    return require('../../assets/cosmetics/rarities/frozen.png');
-                case 'creatorcollabseries':
-                    return require('../../assets/cosmetics/rarities/icon.png');
-                case 'slurpseries':
-                    return require('../../assets/cosmetics/rarities/slurp.png');
-                case 'marvelseries':
-                    return require('../../assets/cosmetics/rarities/marvel.png');
-                case 'lavaseries':
-                    return require('../../assets/cosmetics/rarities/lava.png');
-                case 'shadowseries':
-                    return require('../../assets/cosmetics/rarities/shadow.png');
-                case 'platformseries':
-                    return require('../../assets/cosmetics/rarities/gaming.png');
-                case 'dcuseries':
-                    return require('../../assets/cosmetics/rarities/dc.png');
-                case 'columbusseries':
-                    return require('../../assets/cosmetics/rarities/starwars.png');
-                case 'legendary':
-                    return require('../../assets/cosmetics/rarities/legendary.png');
-                case 'epic':
-                    return require('../../assets/cosmetics/rarities/epic.png');
-                case 'rare':
-                    return require('../../assets/cosmetics/rarities/rare.png');
-                case 'uncommon':
-                    return require('../../assets/cosmetics/rarities/uncommon.png');
-                case 'common':
-                    return require('../../assets/cosmetics/rarities/common.png');
-                default:
-                    return require('../../assets/cosmetics/rarities/common.png');
-            }
-        };
-
-        const { item } = this.props;
-        return (
-            <View style={{ width: 109, height: 109, margin: 5, borderRadius: 5 }}>
-                <Image
-                    source={getRarityPath(item.series ? item.series.value : item.rarity.value)}
-                    style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-                    resizeMethod="contain"
-                />
-                <Image
-                    source={{ uri: item.images.icon }}
-                    onError={() => ({ uri: 'https://imgur.com/HVH5sqV.png' })}
-                    style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-                    resizeMethod="contain"
-                />
-            </View>
-        );
-    }
-}
-
-export default function Home() {
+export default function Home({ navigation }) {
 
     const cosmeticTypes = [
-        'Outfit',
-        'Harvesting Tool',
-        'Emote',
-        'Glider',
-        'BackBling',
-        'Pet',
-        'Wrap',
-        'Toy',
-        'Spray',
-        'Music',
-        'BANNER',
-        'Style',
-        'Loading Screen',
-        'Emoticon',
-        'Contrail',
-        'Item Bundle',
+        {
+            id: 'outfit',
+            name: 'Outfit',
+        },
+        {
+            id: 'pickaxe',
+            name: 'Harvesting Tool',
+        },
+        {
+            id: 'emote',
+            name: 'Emote',
+        },
+        {
+            id: 'glider',
+            name: 'Glider',
+        },
+        {
+            id: 'backpack',
+            name: 'BackBling',
+        },
+        {
+            id: 'pet',
+            name: 'Pet',
+        },
+        {
+            id: 'wrap',
+            name: 'Wrap',
+        },
+        {
+            id: 'toy',
+            name: 'Toy',
+        },
+        {
+            id: 'spray',
+            name: 'Spray',
+        },
+        {
+            id: 'music',
+            name: 'Music',
+        },
+        {
+            id: 'bannertoken',
+            name: 'BANNER',
+        },
+        {
+            id: 'cosmeticvariant',
+            name: 'Style',
+        },
+        {
+            id: 'loadingscreen',
+            name: 'Loading Screen',
+        },
+        {
+            id: 'emoji',
+            name: 'Emoticon',
+        },
+        {
+            id: 'contrail',
+            name: 'Contrail',
+        },
+        {
+            id: 'bundle',
+            name: 'Item Bundle',
+        },
     ]
 
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}cached_data.json`;
@@ -104,7 +94,8 @@ export default function Home() {
         setSearchText(text)
         const filteredCosmetics = cosmetics.filter(
             (item) =>
-                item?.name?.toLowerCase().includes(text.toLowerCase())
+                item?.name?.toLowerCase().includes(text.toLowerCase()) ||
+                (selected !== -1 && item?.type.id.toLowerCase().includes(cosmeticTypes[selected].id.toLowerCase()))
         );
 
         setSearchedCosmetics(filteredCosmetics)
@@ -112,14 +103,19 @@ export default function Home() {
 
     const handlePress = async (index) => {
         setSelected(index);
-        sortedCosmetics
+        const filteredCosmetics = cosmetics.filter(
+            (item) =>
+                item?.type.id.toLowerCase().includes(cosmeticTypes[index].id.toLowerCase())
+        );
+
+        setSearchedCosmetics(filteredCosmetics)
     }
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true); // Set loading to true while fetching data
             let cachedData = null;
@@ -129,7 +125,7 @@ export default function Home() {
                         const currentTime = new Date().getTime();
                         const modificationTimeMilliseconds = i.modificationTime * 1000
                         // Check if cached data is expired
-                        if (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME) {
+                        if (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME || true) {
                             // If not expired, read cached data
                             cachedData = await FileSystem.readAsStringAsync(CACHE_FILE_URI);
                         }
@@ -137,16 +133,16 @@ export default function Home() {
 
                     if (!cachedData) {
                         // Fetch data from API if no cached data or expired
-                        const response = await axios('https://fortnite-api.com/v2/cosmetics/br', {
-                            // headers: {
-                            //     'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
-                            // }
+                        const response = await axios('https://fortniteapi.io/v2/items/list?lang=en&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets', {
+                            headers: {
+                                'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
+                            }
                         })
 
                         const jsonData = await response.data;
                         // Save fetched data to cache
-                        await FileSystem.writeAsStringAsync(CACHE_FILE_URI, JSON.stringify(jsonData.data), { encoding: FileSystem.EncodingType.UTF8 })
-                        cachedData = JSON.stringify(jsonData.data);
+                        await FileSystem.writeAsStringAsync(CACHE_FILE_URI, JSON.stringify(jsonData.items), { encoding: FileSystem.EncodingType.UTF8 })
+                        cachedData = JSON.stringify(jsonData.items);
                     }
 
                     setCosmetics(JSON.parse(cachedData));
@@ -159,30 +155,35 @@ export default function Home() {
             console.error('Error fetching data:', error);
             setRefreshing(false); // Set refreshing to false if there's an error
         }
-    };
+    }, [])
 
-    const loadMoreItems = () => {
+    const loadMoreItems = useCallback(() => {
         setCurrentPage(currentPage + 1);
-    };
+    }, [])
 
-    const onRefresh = () => {
+    const onRefresh = useCallback(async () => {
         setRefreshing(true); // Set refreshing to true when refreshing starts
         // Clear cache and fetch fresh data
-        FileSystem.deleteAsync(CACHE_FILE_URI).then(fetchData);
-    };
+        await FileSystem.getInfoAsync(CACHE_FILE_URI)
+            .then(i => {
+                if (i.exists) FileSystem.deleteAsync(CACHE_FILE_URI).then(fetchData);
+                else fetchData()
+            })
 
-    const getImagePath = (type) => {
+    }, [])
+
+    const getImagePath = useCallback((type) => {
         const typeLower = type.toLowerCase();
         switch (typeLower) {
             case 'outfit':
                 return require('../../assets/cosmetics/types/outfit.png');
-            case 'harvesting tool':
+            case 'pickaxe':
                 return require('../../assets/cosmetics/types/harvesting_tool.png');
             case 'emote':
                 return require('../../assets/cosmetics/types/emote.png');
             case 'glider':
                 return require('../../assets/cosmetics/types/glider.png');
-            case 'backbling':
+            case 'backpack':
                 return require('../../assets/cosmetics/types/backbling.png');
             case 'pet':
                 return require('../../assets/cosmetics/types/pet.png');
@@ -194,22 +195,79 @@ export default function Home() {
                 return require('../../assets/cosmetics/types/spray.png');
             case 'music':
                 return require('../../assets/cosmetics/types/music.png');
-            case 'banner':
+            case 'bannertoken':
                 return require('../../assets/cosmetics/types/banner.png');
-            case 'style':
+            case 'cosmeticvariant':
                 return require('../../assets/cosmetics/types/style.png');
-            case 'loading screen':
+            case 'loadingscreen':
                 return require('../../assets/cosmetics/types/loading_screen.png');
-            case 'emoticon':
+            case 'emoji':
                 return require('../../assets/cosmetics/types/emoticon.png');
             case 'contrail':
                 return require('../../assets/cosmetics/types/contrail.png');
-            case 'item bundle':
+            case 'bundle':
                 return require('../../assets/cosmetics/types/item_bundle.png');
             default:
                 return require('../../assets/cosmetics/types/unknown.png');
         }
-    };
+    }, [])
+
+    const renderItems = useCallback(({ item }) => {
+        return (
+            <TouchableOpacity onPress={() => navigation.navigate("DetailsScreen", { data: item })} style={{ width: 109, height: 109, margin: 5, borderRadius: 5 }}>
+                <Image
+                    source={getRarityPath(item.series ? item.series.id : item.rarity.id)}
+                    style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
+                    
+                />
+                <Image
+                    source={{ uri: item.images.icon }}
+                    onError={() => ({ uri: 'https://imgur.com/HVH5sqV.png' })}
+                    style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
+                />
+            </TouchableOpacity>
+        );
+    }, [])
+
+    const getRarityPath = useCallback((rarity) => {
+        const rarityLower = rarity.toLowerCase();
+        switch (rarityLower) {
+            case 'cubeseries':
+                return require('../../assets/cosmetics/rarities/dark.png');
+            case 'frozenseries':
+                return require('../../assets/cosmetics/rarities/frozen.png');
+            case 'creatorcollabseries':
+                return require('../../assets/cosmetics/rarities/icon.png');
+            case 'slurpseries':
+                return require('../../assets/cosmetics/rarities/slurp.png');
+            case 'marvelseries':
+                return require('../../assets/cosmetics/rarities/marvel.png');
+            case 'lavaseries':
+                return require('../../assets/cosmetics/rarities/lava.png');
+            case 'shadowseries':
+                return require('../../assets/cosmetics/rarities/shadow.png');
+            case 'platformseries':
+                return require('../../assets/cosmetics/rarities/gaming.png');
+            case 'dcuseries':
+                return require('../../assets/cosmetics/rarities/dc.png');
+            case 'columbusseries':
+                return require('../../assets/cosmetics/rarities/starwars.png');
+            case 'legendary':
+                return require('../../assets/cosmetics/rarities/legendary.png');
+            case 'epic':
+                return require('../../assets/cosmetics/rarities/epic.png');
+            case 'rare':
+                return require('../../assets/cosmetics/rarities/rare.png');
+            case 'uncommon':
+                return require('../../assets/cosmetics/rarities/uncommon.png');
+            case 'common':
+                return require('../../assets/cosmetics/rarities/common.png');
+            default:
+                return require('../../assets/cosmetics/rarities/common.png');
+        }
+    }, [])
+
+    const dataToRender = cosmetics.slice(0, 1000)
 
     return (
         <View style={styles.container}>
@@ -219,7 +277,7 @@ export default function Home() {
             }}>
                 <View style={{
                     flexDirection: 'row',
-                    marginTop: 40,
+                    marginTop: 50,
                     width: '90%',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -288,7 +346,7 @@ export default function Home() {
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 13, height: 60, marginBottom: 10 }}>
+                <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 13, height: Platform.OS === 'android' ? 60 : null, flexGrow: Platform.OS === 'android' ? 1 : 1, marginBottom: 10 }}>
                     {cosmeticTypes.map((type, index) => (
                         <TouchableOpacity
                             key={index}
@@ -307,11 +365,11 @@ export default function Home() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                                <Image source={getImagePath(type)} style={{ width: 25, height: 25, tintColor: selected === index ? '#1473FC' : 'white', marginRight: 5 }} />
+                                <Image source={getImagePath(type.id)} style={{ width: 25, height: 25, tintColor: selected === index ? '#1473FC' : 'white', marginRight: 5 }} />
                                 <Text style={{
                                     color: selected === index ? '#1473FC' : 'white',
                                     fontWeight: 'bold',
-                                }}>{type}</Text>
+                                }}>{type.name}</Text>
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -319,15 +377,15 @@ export default function Home() {
 
                 <FlatList
                     showsVerticalScrollIndicator={false}
-                    data={searchedCosmetics.length ? searchedCosmetics : cosmetics}
-                    renderItem={({ item }) => <CosmeticItem item={item} />}
+                    data={dataToRender}
+                    renderItem={({ item }) => <RenderImage item={item} navigation={navigation}/>}
                     keyExtractor={(item, index) => index.toString()}
                     numColumns={3}
-                    onEndReachedThreshold={0.1}
+                    onEndReachedThreshold={1}
                     onEndReached={loadMoreItems}
                     ListFooterComponent={() => { loading ? <ActivityIndicator size="large" color="#1473FC" /> : null }}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} style={{ marginTop: 10 }} />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} style={{ marginTop: 5 }} />
                     }
                 />
             </View>
