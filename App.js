@@ -1,13 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { StatusBar } from 'react-native';
-import { StyleSheet, Platform, View, Animated, Dimensions, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { StyleSheet, Platform, View, Animated, Dimensions, Keyboard } from 'react-native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import HomeScreenUI from './src/main/home'
 import DetailsScreenUI from './src/main/details'
+import ItemshopScreenUI from './src/main/itemshop'
+import * as NavigationBar from 'expo-navigation-bar';
+import 'react-native-reanimated'
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -15,7 +18,25 @@ function getWidth() {
   return width / 5
 }
 
-function HomeScreem() {
+function HomeScreen() {
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setIsKeyboardOpen(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setIsKeyboardOpen(false)
+    );
+
+    // Clean up listeners when component unmounts
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   const tabOffsetValue = useRef(new Animated.Value(0)).current
   const Tab = createBottomTabNavigator()
   return (
@@ -25,7 +46,8 @@ function HomeScreem() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [styles.tabBar, { opacity: isKeyboardOpen ? 0 : 1 }],
+
         }}>
 
         <Tab.Screen
@@ -54,7 +76,7 @@ function HomeScreem() {
 
         <Tab.Screen
           name="MarketS"
-          component={HomeScreenUI}
+          component={ItemshopScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (
@@ -77,15 +99,15 @@ function HomeScreem() {
         />
 
         <Tab.Screen
-          name="Portfolio"
-          component={HomeScreenUI}
+          name="ItemShop"
+          component={ItemshopScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Ionicons name="file-tray-outline" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
+                  <Ionicons name="cart" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
                 ) : (
-                  <Ionicons name="file-tray-outline" size={size} color={color} />
+                  <Ionicons name="cart-outline" size={size} color={color} />
                 )
               )
             },
@@ -102,7 +124,7 @@ function HomeScreem() {
 
         <Tab.Screen
           name="Profile"
-          component={HomeScreenUI}
+          component={ItemshopScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (
@@ -147,20 +169,33 @@ function HomeScreem() {
 
 export default function App() {
   const HomeScreenStack = createStackNavigator()
+  NavigationBar.setVisibilityAsync("hidden");
+  NavigationBar.setBackgroundColorAsync("black");
+  NavigationBar.useVisibility(null)
+
+  const theme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: '#1d1f24'
+      ,
+    },
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
-      <NavigationContainer>
+      <NavigationContainer theme={theme}>
         <HomeScreenStack.Navigator
           screenOptions={{
+            // presentation: 'transparentModal',
             headerShown: false,
-
           }}>
 
           <HomeScreenStack.Screen
             name="HomeScreen"
-            component={HomeScreem}
+            component={HomeScreen}
+
           />
 
           <HomeScreenStack.Screen
@@ -177,7 +212,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-
   tabBar: {
     borderTopColor: '#1d1f24',
     borderColor: '#1d1f24',

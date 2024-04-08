@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 
@@ -50,10 +50,8 @@ const RenderItem = ({ item, navigation }) => {
                 cachePolicy='disk'
             />
             <Image
-                source={{ uri: item.images.icon }}
-                onError={() => ({ uri: 'https://imgur.com/HVH5sqV.png' })}
+                source={{ uri: item.images.icon ? item.images.icon : item.displayAssets.length ? item.displayAssets[0].url : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }}
                 style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-                cachePolicy='memory'
             />
         </TouchableOpacity>
     );

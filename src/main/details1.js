@@ -32,9 +32,48 @@ export default function Details({ navigation }) {
     const [styleIndex, setStyleIndex] = useState(0)
     const [assetsIndex, setAssetsIndex] = useState(0)
     const [assets, setAssets] = useState([])
+    const [selectedStyles, setSelectedStyles] = useState([])
     const [playerData, setPlayerData] = useState({
         bookmarked: false,
     })
+
+    const getUniqueChannelNames = (styles) => {
+        const uniqueChannelNames = new Set();
+        styles.forEach(item => uniqueChannelNames.add(item.channelName));
+        return Array.from(uniqueChannelNames);
+    };
+
+    const selectStyle = (selectedChannel, selectedTag, index) => {
+        setSelectedStyles(prevStyles => {
+            const existingStyleIndex = prevStyles.findIndex(style => style.channel === selectedChannel);
+            if (existingStyleIndex !== -1) {
+                const updatedStyles = [...prevStyles];
+                updatedStyles[existingStyleIndex] = { channel: selectedChannel, tag: selectedTag, index: index };
+
+                findPreviewVideoIndex(updatedStyles)
+                return updatedStyles;
+            } else {
+                findPreviewVideoIndex([...prevStyles, { channel: selectedChannel, tag: selectedTag, index: index }])
+                return [...prevStyles, { channel: selectedChannel, tag: selectedTag, index: index }];
+            }
+        });
+    };
+
+    const findPreviewVideoIndex = (selectedStyles) => {
+        for (let i = 0; i < receivedData.previewVideos.length; i++) {
+            const styles = receivedData.previewVideos[i].styles;
+            const matchedStyles = selectedStyles.filter(selectedStyle => styles.find(style => style.channel === selectedStyle.channel && style.tag === selectedStyle.tag));
+
+            if (matchedStyles.length === selectedStyles.length) {
+                // setIsLoading(true)
+                setStyleIndex(i)
+                return
+            }
+        }
+
+        // setIsLoading(true)
+        setStyleIndex(selectedStyles[0].index ? selectedStyles[0].index : 0)
+    };
 
     useEffect(() => {
         const data = []
@@ -47,6 +86,15 @@ export default function Details({ navigation }) {
         )
 
         setAssets(data)
+
+        const uniqueChannelNames = getUniqueChannelNames(receivedData.styles);
+        uniqueChannelNames.forEach(channelName => {
+            const filteredStyles = receivedData.styles.filter(item => item.channelName === channelName);
+            if (filteredStyles.length > 0) {
+                const firstStyle = filteredStyles[0];
+                selectStyle(firstStyle.channel, firstStyle.tag, 0);
+            }
+        });
 
     }, []);
 
@@ -181,6 +229,37 @@ export default function Details({ navigation }) {
         return rows;
     };
 
+    const renderScrollView = (channelName) => {
+        const filteredStyles = receivedData.styles.filter(item => item.channelName === channelName);
+
+        return (
+            <ScrollView key={channelName} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                    {filteredStyles.map((item, index) => (
+                        <View key={index}>
+                            <RNGHTouchableOpacity onPress={() => {
+                                console.log(index)
+                                selectStyle(item.channel, item.tag, index);
+                            }} style={{
+                                marginRight: 5,
+                                height: 50,
+                                width: 50,
+                                borderRadius: 5,
+                            }}>
+                                <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} resizeMode='contain' />
+                                <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: selectedStyles.find(style => style.channel === item.channel && style.tag === item.tag) ? colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
+                            </RNGHTouchableOpacity>
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
+        );
+    };
+
     return (
         <View style={styles.container}>
 
@@ -217,15 +296,18 @@ export default function Details({ navigation }) {
                 alignItems: 'center',
                 flex: 1 // Make the parent view take up the entire screen
             }}>
-                {isLoading && (
-                    <Animated.View style={[{ width: screenWidth, position: 'absolute', justifyContent: 'center', alignItems: 'center' }, rBottomSheetStyle]}>
-                        <Image
-                            source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)}
-                            style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-                        />
-                        <Text style={{ color: 'white', fontSize: 20 }}>Loading...</Text>
-                    </Animated.View>
-                )}
+                {
+                    isLoading ? (
+                        <Animated.View style={[{ width: screenWidth, position: 'absolute', justifyContent: 'center', alignItems: 'center' }, rBottomSheetStyle]}>
+                            <Image
+                                source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)}
+                                style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
+                            />
+                            <Text style={{ color: 'white', fontSize: 20 }}>Loading...</Text>
+                        </Animated.View>
+                    ) : null
+                }
+
                 {
                     receivedData.previewVideos.length > 0 && receivedData.previewVideos[styleIndex] ? (
                         <Animated.View style={[{
@@ -233,7 +315,7 @@ export default function Details({ navigation }) {
                             position: 'absolute',
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            alignItems: 'flex-start'
+                            alignItems: 'flex-start',
                         }, rBottomSheetStyle]}>
                             <Video
                                 shouldPlay
@@ -247,7 +329,7 @@ export default function Details({ navigation }) {
                                 }}
                                 style={{
                                     width: '100%',
-                                    height: '100%'
+                                    height: '100%',
                                 }}
                             />
                             {
@@ -468,36 +550,23 @@ export default function Details({ navigation }) {
                 </View>
 
                 <View style={{ flex: 1 }}>
-                    {
-                        receivedData.styles.length ? (
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
-                                <View style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    marginTop: 10,
-                                }}>
-                                    {
-                                        receivedData.styles.map((item, index) => (
-                                            <View key={index}>
-                                                <RNGHTouchableOpacity onPress={() => setStyleIndex(index)} style={{
-                                                    marginRight: 5,
-                                                    height: 50,
-                                                    width: 50,
-                                                    borderRadius: 5,
-                                                }}>
-                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} resizeMode='contain' />
-                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: index === styleIndex ? colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
-                                                </RNGHTouchableOpacity>
-                                            </View>
-
-                                        ))
-
-                                    }
-                                </View>
-                            </ScrollView>
-                        ) : null
-                    }
+                    {receivedData.styles.length ? (
+                        <>
+                            {/* Loop through unique channelName values */}
+                            {getUniqueChannelNames(receivedData.styles).map((channelName, index) => (
+                                <React.Fragment key={index}>
+                                    <Text style={{
+                                        fontFamily: "Burbank",
+                                        color: "white",
+                                        paddingLeft: 20,
+                                        fontSize: 20,
+                                        marginTop: 5
+                                    }}>{channelName}</Text>
+                                    {renderScrollView(channelName)}
+                                </React.Fragment>
+                            ))}
+                        </>
+                    ) : null}
                 </View>
 
                 <View style={{
