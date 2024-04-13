@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Platform, View, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { Dimensions, StyleSheet, Platform, View, Text, NativeScrollEvent } from 'react-native';
 import React, { useCallback, useRef, useImperativeHandle, useState } from 'react';
 import { Gesture, GestureDetector, TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import Animated, {
@@ -16,21 +16,21 @@ const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const MAX_TRANSLATE_Y = -700;
-const openHeight = 700
-const closeHeight = 50
 
 type BackgroundColors = {
+  color?: string
   Color1: string;
   Color2: string;
   Color3: string;
   Color4: string;
   Color5: string;
-};
+}
 
 type BottomSheetProps = {
   children?: React.ReactNode | [React.ReactNode];
   onTranslationYChange?: (translationY: number, animated: boolean) => void;
   background?: BackgroundColors;
+  type?: string
 };
 
 export type BottomSheetRefProps = {
@@ -40,8 +40,8 @@ export type BottomSheetRefProps = {
 };
 
 const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
-  ({ children, onTranslationYChange, background }, ref) => {
-    const translateY = useSharedValue(-385);
+  ({ children, onTranslationYChange, background, type }, ref) => {
+    const translateY = useSharedValue(type === "details" ? -385 : 100);
     const active = useSharedValue(false);
     const data = useSharedValue(false);
     const scrollBegin = useSharedValue(0);
@@ -58,7 +58,7 @@ const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
       active.value = destination !== -385;
 
       translateY.value = withSpring(destination, { damping: 15 });
-      runOnJS(onTranslationYChange)(destination, true)
+      if (onTranslationYChange) runOnJS(onTranslationYChange)(destination, true);
 
     }, [translateY.value]);
 
@@ -114,14 +114,14 @@ const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
       .onUpdate(event => {
         translateY.value = event.translationY + context.value.y - scrollBegin.value;
         translateY.value = Math.max(translateY.value, MAX_TRANSLATE_Y);
-        runOnJS(onTranslationYChange)(translateY.value, false)
+        if (onTranslationYChange) runOnJS(onTranslationYChange)(translateY.value, false);
         if (event.translationY > 0 && scrollY.value === 0) {
           runOnJS(setEnableScroll)(false);
         }
       })
       .onEnd(() => {
         if (translateY.value > -SCREEN_HEIGHT / 6) {
-          scrollTo(Platform.OS === 'ios' ? -50 : 0);
+          scrollTo(type === "details" ? Platform.OS === 'ios' ? -50 : 0 : 100);
         } else if (translateY.value > -SCREEN_HEIGHT / 1.6) {
           scrollTo(-385);
         } else if (translateY.value < -SCREEN_HEIGHT / 1.6) {
@@ -133,16 +133,20 @@ const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
     const scrollViewGesture = Gesture.Native();
 
     return (
-      <Animated.View style={[styles.bottomSheetContainer, tBottomSheetStyle, rBottomSheetStyle, { backgroundColor: background.Color3, elevation: 10, shadowOffset: { width: 0, height: 10 / 2 }, shadowOpacity: 0.3, shadowRadius: 10 / 2 }]}>
+      <Animated.View style={[styles.bottomSheetContainer, tBottomSheetStyle, rBottomSheetStyle, { backgroundColor: type === "details" ? background.Color3 : background.color, elevation: 10, shadowOffset: { width: 0, height: 10 / 2 }, shadowOpacity: 0.3, shadowRadius: 10 / 2 }]}>
         <AnimatedSvg width="100%" height="100%" viewBox="0 -30 200 900" style={rBottomSheetStyle}>
-          <Path
-            d="M 126.747 132.656 C 130.074 66.6065 190.054 33.0868 219.628 24.5832 L 333.765 0 L 337 509.289 C 339.3333 613.8593 341.6667 718.4297 344 823 C 341 1034 381 984 -87 984 C 113 767 -122 780 -64 531 C -48 438 -19.1831 378.674 38.4864 340.454 C 110.573 292.679 122.588 215.219 126.747 132.656"
-            fill={background.Color2}
-          />
+          {
+            type === "details" ? (
+              <Path
+                d="M 126.747 132.656 C 130.074 66.6065 190.054 33.0868 219.628 24.5832 L 333.765 0 L 337 509.289 C 339.3333 613.8593 341.6667 718.4297 344 823 C 341 1034 381 984 -87 984 C 113 767 -122 780 -64 531 C -48 438 -19.1831 378.674 38.4864 340.454 C 110.573 292.679 122.588 215.219 126.747 132.656"
+                fill={background.Color2}
+              />
+            ) : null
+          }
           <TouchableOpacity onPress={checkSheetActive}>
             <View style={styles.line} />
           </TouchableOpacity>
-          <Animated.View style={[{ width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)' }, rBottomSheetStyle]}>
+          <Animated.View style={[{ width: '100%', height: '100%', backgroundColor: type === "details" ? 'rgba(0, 0, 0, 0.5)' : null }, rBottomSheetStyle]}>
             <GestureDetector
               gesture={Gesture.Simultaneous(scrollViewGesture, panScroll)}>
               <Animated.ScrollView
