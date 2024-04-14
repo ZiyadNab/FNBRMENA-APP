@@ -6,11 +6,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import HomeScreenUI from './src/main/home'
+import CosmeticsScreenUI from './src/main/cosmetics'
 import DetailsScreenUI from './src/main/details'
 import ItemshopScreenUI from './src/main/itemshop'
 import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated'
+import { PortalProvider } from '@gorhom/portal'
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -51,8 +52,8 @@ function HomeScreen() {
         }}>
 
         <Tab.Screen
-          name="Home"
-          component={HomeScreenUI}
+          name="Cosmetics"
+          component={CosmeticsScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (
@@ -185,26 +186,27 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
-      <NavigationContainer theme={theme}>
-        <HomeScreenStack.Navigator
-          screenOptions={{
-            // presentation: 'transparentModal',
-            headerShown: false,
-          }}>
+      <PortalProvider>
+        <NavigationContainer theme={theme}>
+          <HomeScreenStack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}>
 
-          <HomeScreenStack.Screen
-            name="HomeScreen"
-            component={HomeScreen}
+            <HomeScreenStack.Screen
+              name="HomeScreen"
+              component={HomeScreen}
 
-          />
+            />
 
-          <HomeScreenStack.Screen
-            name="DetailsScreen"
-            component={DetailsScreenUI}
-          />
+            <HomeScreenStack.Screen
+              name="DetailsScreen"
+              component={DetailsScreenUI}
+            />
 
-        </HomeScreenStack.Navigator>
-      </NavigationContainer>
+          </HomeScreenStack.Navigator>
+        </NavigationContainer>
+      </PortalProvider>
     </GestureHandlerRootView>
 
   )

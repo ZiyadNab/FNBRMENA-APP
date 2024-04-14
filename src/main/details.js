@@ -356,7 +356,7 @@ export default function Details({ navigation }) {
                 }
             </View>
 
-            <BottomSheet ref={bottomSheetRef} onTranslationYChange={handleTranslationYChange} background={colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
+            <BottomSheet ref={bottomSheetRef} type='details' onTranslationYChange={handleTranslationYChange} background={colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
                 <View style={{
                     marginTop: 20,
                     marginHorizontal: 20,
