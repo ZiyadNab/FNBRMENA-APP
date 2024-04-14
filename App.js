@@ -190,7 +190,6 @@ export default function App() {
         <NavigationContainer theme={theme}>
           <HomeScreenStack.Navigator
             screenOptions={{
-              // presentation: 'transparentModal',
               headerShown: false,
             }}>
 
