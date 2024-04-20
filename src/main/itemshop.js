@@ -3,11 +3,13 @@ import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity } from 'react
 import { Octicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios'
+import colors from '../../colors.json'
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Itemshop({ navigation }) {
 
     return (
-        <View style={styles.container}>
+        <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
             <View style={{
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -47,7 +49,7 @@ export default function Itemshop({ navigation }) {
                 </View>
 
             </View>
-        </View>
+        </LinearGradient>
 
     );
 }

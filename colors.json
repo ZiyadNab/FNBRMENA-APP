@@ -1,4 +1,5 @@
 {
+  "cosmetics": {
     "Common": {
       "id": "Common",
       "name": "COMMON",
@@ -247,5 +248,11 @@
       },
       "image": "https://media.fortniteapi.io/images/rarities/v2/ColumbusSeries.png"
     }
+  },
+  "app": {
+    "background": "#000",
+    "buttons": "#0000FF",
+    "secondray": "#009BFF",
+    "filter": "#000C66"
   }
-  
+}

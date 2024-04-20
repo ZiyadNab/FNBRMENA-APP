@@ -242,7 +242,6 @@ export default function Details({ navigation }) {
                     {filteredStyles.map((item, index) => (
                         <View key={index}>
                             <RNGHTouchableOpacity onPress={() => {
-                                console.log(index)
                                 selectStyle(item.channel, item.tag, index);
                             }} style={{
                                 marginRight: 5,
@@ -251,7 +250,7 @@ export default function Details({ navigation }) {
                                 borderRadius: 5,
                             }}>
                                 <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} resizeMode='contain' />
-                                <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: selectedStyles.find(style => style.channel === item.channel && style.tag === item.tag) ? colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
+                                <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: selectedStyles.find(style => style.channel === item.channel && style.tag === item.tag) ? colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
                             </RNGHTouchableOpacity>
                         </View>
                     ))}
@@ -438,7 +437,7 @@ export default function Details({ navigation }) {
                 }
             </View>
 
-            <BottomSheet ref={bottomSheetRef} onTranslationYChange={handleTranslationYChange} background={colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
+            <BottomSheet ref={bottomSheetRef} onTranslationYChange={handleTranslationYChange} background={colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
                 <View style={{
                     marginTop: 20,
                     marginHorizontal: 20,
@@ -451,7 +450,7 @@ export default function Details({ navigation }) {
                     }}>
                         <View style={{
                             padding: 4,
-                            backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
+                            backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
                             flexDirection: 'row',
                             alignItems: 'left',
                             justifyContent: 'center',
@@ -460,12 +459,12 @@ export default function Details({ navigation }) {
                             <Image source={getImagePath(receivedData.type.id)} style={{
                                 width: 15,
                                 height: 15,
-                                tintColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                tintColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
                                 marginRight: 5,
                                 marginLeft: 5
                             }} />
                             <Text style={{
-                                color: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                color: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
                                 fontFamily: "Burbank",
                                 marginRight: 5,
                                 textAlign: 'center',
@@ -494,7 +493,7 @@ export default function Details({ navigation }) {
                                 width: 40,
                                 elevation: 10,
                                 borderRadius: 5,
-                                backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}>
@@ -607,7 +606,7 @@ export default function Details({ navigation }) {
                     <RNGHTouchableOpacity style={{
                         marginTop: 10,
                         width: '100%',
-                        backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
+                        backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
                         paddingVertical: 5,
                         borderRadius: 5,
                         justifyContent: 'center',
@@ -637,36 +636,36 @@ export default function Details({ navigation }) {
                             fontSize: 20,
                         }}>RATE {receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()}</Text>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '20%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '20%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>😱</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>20%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '44%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '44%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>❤️</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>44%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '51%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '51%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🙂</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>51%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '33%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '33%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🤢</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>33%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '12%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '12%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>💩</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>12%</Text>

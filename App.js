@@ -12,6 +12,8 @@ import ItemshopScreenUI from './src/main/itemshop'
 import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated'
 import { PortalProvider } from '@gorhom/portal'
+import i18next from './localization/i18n.js'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -58,9 +60,9 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Feather name="home" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
+                  <Feather name="home" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
                 ) : (
-                  <Feather name="home" size={size} color={color} />
+                  <Feather name="home" size={size} color={"white"} />
                 )
               )
             },
@@ -82,9 +84,9 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <AntDesign name="appstore-o" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
+                  <AntDesign name="appstore-o" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
                 ) : (
-                  <AntDesign name="appstore-o" size={size} color={color} />
+                  <AntDesign name="appstore-o" size={size} color={"white"} />
                 )
               )
             },
@@ -92,7 +94,7 @@ function HomeScreen() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 1.25,
+                toValue: getWidth() * (i18next.language === "ar" ? -1.11 : 1.11),
                 useNativeDriver: true
               }).start()
             }
@@ -106,9 +108,9 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Ionicons name="cart" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
+                  <Ionicons name="cart" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
                 ) : (
-                  <Ionicons name="cart-outline" size={size} color={color} />
+                  <Ionicons name="cart-outline" size={size} color={"white"} />
                 )
               )
             },
@@ -116,7 +118,7 @@ function HomeScreen() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 2.5,
+                toValue: getWidth() * (i18next.language === "ar" ? -2.22 : 2.22),
                 useNativeDriver: true
               }).start()
             }
@@ -130,9 +132,9 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Feather name="user" size={size} color={color} style={{ backgroundColor: '#25292e', padding: 10, borderRadius: 10 }} />
+                  <Feather name="user" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
                 ) : (
-                  <Feather name="user" size={size} color={color} />
+                  <Feather name="user" size={size} color={"white"} />
                 )
               )
             },
@@ -140,7 +142,7 @@ function HomeScreen() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 3.75,
+                toValue: getWidth() * (i18next.language === "ar" ? -3.33 : 3.33),
                 useNativeDriver: true
               }).start()
             }
@@ -150,12 +152,13 @@ function HomeScreen() {
       </Tab.Navigator>
 
       <Animated.View style={{
+        display: isKeyboardOpen ? 'none' : 'flex',
         width: getWidth() - 40,
         height: 3,
-        backgroundColor: '#1573FE',
+        backgroundColor: "#009BFF",
         position: 'absolute',
-        bottom: 30,
-        left: 49,
+        bottom: 5,
+        left: 64,
         borderRadius: 5,
         transform: [{
           translateX: tabOffsetValue
@@ -178,10 +181,27 @@ export default function App() {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: '#1d1f24'
+      background: '#000'
       ,
     },
   }
+
+  useEffect(() => {
+
+    const LANGUAGE_STORAGE_KEY = '@app_language';
+    const loadLanguage = async () => {
+      try {
+        const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (storedLanguage) {
+          i18next.changeLanguage(storedLanguage);
+        }
+      } catch (e) {
+        console.log(e)
+      }
+
+    }
+    loadLanguage()
+  }, [])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -215,15 +235,13 @@ export default function App() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    borderTopColor: '#1d1f24',
-    borderColor: '#1d1f24',
-    backgroundColor: '#1d1f24',
-    height: 60,
-    padding: Platform.OS === 'ios' ? 10 : 0,
-    position: 'absolute',
-    bottom: 20,
-    marginHorizontal: 20,
-    borderRadius: 10,
+    borderTopColor: '#191919',
+    borderColor: '#191919',
+    backgroundColor: '#191919',
+    height: 70,
+    paddingHorizontal: 40,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     shadowOffset: { width: 0, height: 10 / 2 },
     shadowOpacity: 0.3,
     shadowRadius: 10 / 2,

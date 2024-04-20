@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
     StyleSheet, Text, View, TextInput, FlatList, ActivityIndicator,
-    RefreshControl, TouchableOpacity, Platform
+    RefreshControl, TouchableOpacity, I18nManager, res
 } from 'react-native';
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -15,236 +15,452 @@ import { Portal } from '@gorhom/portal'
 import colors from '../../colors.json'
 import { useFonts } from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
+import i18next from '../../localization/i18n.js'
+import RNRestart from 'react-native-restart'
 
 export default function Home({ navigation }) {
+    const { t } = useTranslation()
 
     const cosmeticTypes = [
         {
             id: 'all',
-            name: 'All',
+            name: t('all'),
         },
         {
             id: 'outfit',
-            name: 'Outfit',
+            name: t('outfit'),
         },
         {
             id: 'pickaxe',
-            name: 'Harvesting Tool',
+            name: t('pickaxe'),
         },
         {
             id: 'emote',
-            name: 'Emote',
+            name: t('emote'),
         },
         {
             id: 'glider',
-            name: 'Glider',
+            name: t('glider'),
         },
         {
             id: 'backpack',
-            name: 'BackBling',
+            name: t('backpack'),
         },
         {
             id: 'pet',
-            name: 'Pet',
+            name: t('pet'),
         },
         {
             id: 'wrap',
-            name: 'Wrap',
+            name: t('wrap'),
         },
         {
             id: 'toy',
-            name: 'Toy',
+            name: t('toy'),
         },
         {
             id: 'spray',
-            name: 'Spray',
+            name: t('spray'),
         },
         {
             id: 'music',
-            name: 'Music',
+            name: t('music'),
         },
         {
             id: 'bannertoken',
-            name: 'BANNER',
+            name: t('bannertoken'),
         },
         {
             id: 'cosmeticvariant',
-            name: 'Style',
+            name: t('cosmeticvariant'),
         },
         {
             id: 'loadingscreen',
-            name: 'Loading Screen',
+            name: t('loadingscreen'),
         },
         {
             id: 'emoji',
-            name: 'Emoticon',
+            name: t('emoji'),
         },
         {
             id: 'contrail',
-            name: 'Contrail',
+            name: t('contrail'),
         },
         {
             id: 'bundle',
-            name: 'Item Bundle',
+            name: t('bundle'),
         },
     ]
 
     const cosmeticRarities = [
         {
             "id": "Legendary",
-            "name": "Legendary"
+            "name": t('legendary')
         },
         {
             "id": "Epic",
-            "name": "Epic"
+            "name": t('epic')
         },
         {
             "id": "Rare",
-            "name": "Rare"
+            "name": t('rare')
         },
         {
             "id": "Uncommon",
-            "name": "Uncommon"
+            "name": t('uncommon')
         },
         {
             "id": "CUBESeries",
-            "name": "Dark Series"
+            "name": t('cube_series')
         },
         {
             "id": "DCUSeries",
-            "name": "DC Series"
+            "name": t('dcu_series')
         },
         {
             "id": "FrozenSeries",
-            "name": "Frozen Series"
+            "name": t('frozen_series')
         },
         {
             "id": "CreatorCollabSeries",
-            "name": "Icon Series"
+            "name": t('creator_collab_series')
         },
         {
             "id": "LavaSeries",
-            "name": "Lava Series"
+            "name": t('lava_series')
         },
         {
             "id": "MarvelSeries",
-            "name": "Marvel Series"
+            "name": t('marvel_series')
         },
         {
             "id": "PlatformSeries",
-            "name": "Gaming Legends Series"
+            "name": t('platform_series')
         },
         {
             "id": "ShadowSeries",
-            "name": "Shadow Series"
+            "name": t('shadow_series')
         },
         {
             "id": "SlurpSeries",
-            "name": "Slurp Series"
+            "name": t('slurp_series')
         },
         {
             "id": "ColumbusSeries",
-            "name": "Star Wars Series"
+            "name": t('columbus_series')
         },
         {
             "id": "Common",
-            "name": "Common"
-        },
+            "name": t('common')
+        }
     ]
 
     const cosmeticTags = [
         {
             "id": "Cosmetics.UserFacingFlags.HasVariants",
-            "name": "Styles"
+            "name": t('cosmeticvariant')
         },
         {
             "id": "Cosmetics.UserFacingFlags.Reactive",
-            "name": "Reactive"
+            "name": t('reactive')
         },
         {
             "id": "Cosmetics.UserFacingFlags.Emote.Traversal",
-            "name": "Traversal"
+            "name": t('traversal')
         },
         {
             "id": "Cosmetics.UserFacingFlags.BuiltInEmote",
-            "name": "Built-In"
+            "name": t('built_in')
         },
         {
             "id": "Cosmetics.UserFacingFlags.Synced",
-            "name": "Synced"
+            "name": t('synced')
         },
         {
             "id": "Cosmetics.UserFacingFlags.Wrap.Animated",
-            "name": "Animated"
+            "name": t('animated')
         },
         {
             "id": "Cosmetics.QuestsMetaData.Achievements.Umbrella",
-            "name": "Umbrellas"
+            "name": t('unbrella')
         },
         {
             "id": "Cosmetics.Gating.RatingMin.Teen",
-            "name": "Teen Rated"
+            "name": t('teen_rated')
         },
         {
             "id": "Cosmetics.UserFacingFlags.Transform",
-            "name": "Transform"
+            "name": t('transform')
         },
         {
             "id": "Cosmetics.UserFacingFlags.GearUp",
-            "name": "Gear Up"
+            "name": t('gear_up')
         }
     ]
 
     const cosmeticSources = [
         {
-            id: "Cosmetics.Source.Season",
-            name: "Battle Pass",
-            path: require('../../assets/cosmetics/others/bpstarold.png'),
-            type: "image",
-            colors: ['#FF9E00', '#443200']
+            "id": "Cosmetics.Source.Season",
+            "name": t('battlepass'),
+            "path": require('../../assets/cosmetics/others/bpstarold.png'),
+            "type": "image",
+            "colors": ["#FF9E00", "#443200"]
         },
         {
-            id: "Cosmetics.Source.ItemShop",
-            name: "Shop",
-            path: require('../../assets/cosmetics/others/vbucks.png'),
-            type: "image",
-            colors: ['#00FFD4', '#004440']
+            "id": "Cosmetics.Source.ItemShop",
+            "name": t('itemshop'),
+            "path": require('../../assets/cosmetics/others/vbucks.png'),
+            "type": "image",
+            "colors": ["#00FFD4", "#004440"]
         },
         {
-            id: "Cosmetics.Source.CrewPack",
-            name: "Crew",
-            path: require('../../assets/cosmetics/others/fncrew.png'),
-            type: "image",
-            colors: ['#FF0000', '#440000']
+            "id": "Cosmetics.Source.CrewPack, Cosmetics.Crew",
+            "name": t('crew'),
+            "path": require('../../assets/cosmetics/others/fncrew.png'),
+            "type": "image",
+            "colors": ["#FF0000", "#440000"]
         },
         {
-            id: "Cosmetics.Source.Challenge, Cosmetics.Source.QuestReward",
-            name: "Quests",
-            path: require('../../assets/cosmetics/others/quests.png'),
-            type: "image",
-            colors: ['#00ADFF', '#002E44']
+            "id": "Cosmetics.Source.Challenge, Cosmetics.Source.QuestReward, Cosmetics.UserFacingFlags.HasUpgradeQuests",
+            "name": t('quests'),
+            "path": require('../../assets/cosmetics/others/quests.png'),
+            "type": "image",
+            "colors": ["#00ADFF", "#002E44"]
         },
         {
-            id: "Cosmetics.Source.RMT, Cosmetics.Source.StarterPack",
-            name: "Packs",
-            type: "emoji",
-            emoji: "💲",
-            colors: ['#5DFF00', '#194400']
+            "id": "Cosmetics.Source.RMT, Cosmetics.Source.StarterPack",
+            "name": t('packs'),
+            "type": "emoji",
+            "emoji": "💲",
+            "colors": ["#5DFF00", "#194400"]
         },
         {
-            id: "Cosmetics.Source.AnySeason.FirstWin",
-            name: "First Win",
-            path: require('../../assets/cosmetics/others/firstwin.png'),
-            type: "image",
-            colors: ['#A500FF', '#2C0044']
+            "id": "Cosmetics.Source.AnySeason.FirstWin",
+            "name": t('first_win'),
+            "path": require('../../assets/cosmetics/others/firstwin.png'),
+            "type": "image",
+            "colors": ["#A500FF", "#2C0044"]
         },
         {
-            id: "Cosmetics.Source.FNCS",
-            name: "FNCS",
-            path: require('../../assets/cosmetics/others/fncs.png'),
-            type: "image",
-            colors: ['#00FFB9', '#004431']
+            "id": "Cosmetics.Source.FNCS",
+            "name": t('fncs'),
+            "path": require('../../assets/cosmetics/others/fncs.png'),
+            "type": "image",
+            "colors": ["#00FFB9", "#004431"]
+        }
+    ]
+
+    const cosmeticChapters = [
+        {
+            "chapter": 1,
+            "name": t('c1'),
+            "path": require('../../assets/seasons/ch1.png'),
+            "seasons": [
+                {
+                    "season": 1,
+                    "displayName": t('s1'),
+                    "startDate": "2017-10-24 09:00:00+00:00",
+                    "endDate": "2017-12-14 08:59:59+00:00"
+                },
+                {
+                    "season": 2,
+                    "displayName": t('s2'),
+                    "startDate": "2017-12-14 09:00:00+00:00",
+                    "endDate": "2018-02-22 08:59:59+00:00"
+                },
+                {
+                    "season": 3,
+                    "displayName": t('s3'),
+                    "startDate": "2018-02-22 09:00:00+00:00",
+                    "endDate": "2018-05-01 08:59:59+00:00"
+                },
+                {
+                    "season": 4,
+                    "displayName": t('s4'),
+                    "startDate": "2018-05-01 09:00:00+00:00",
+                    "endDate": "2018-07-11 08:59:59+00:00"
+                },
+                {
+                    "season": 5,
+                    "displayName": t('s5'),
+                    "startDate": "2018-07-11 09:00:00+00:00",
+                    "endDate": "2018-09-27 08:59:59+00:00"
+                },
+                {
+                    "season": 6,
+                    "displayName": t('s6'),
+                    "startDate": "2018-09-27 09:00:00+00:00",
+                    "endDate": "2018-12-06 08:59:59+00:00"
+                },
+                {
+                    "season": 7,
+                    "displayName": t('s7'),
+                    "startDate": "2018-12-06 09:00:00+00:00",
+                    "endDate": "2019-02-28 07:59:59+00:00"
+                },
+                {
+                    "season": 8,
+                    "displayName": t('s8'),
+                    "startDate": "2019-02-28 08:00:00+00:00",
+                    "endDate": "2019-05-09 07:59:59+00:00"
+                },
+                {
+                    "season": 9,
+                    "displayName": t('s9'),
+                    "startDate": "2019-05-09 08:00:00+00:00",
+                    "endDate": "2019-08-01 07:59:59+00:00"
+                },
+                {
+                    "season": 10,
+                    "displayName": t('s10'),
+                    "startDate": "2019-08-01 08:00:00+00:00",
+                    "endDate": "2019-10-13 18:00:00+00:00"
+                }
+            ]
         },
+        {
+            "chapter": 2,
+            "name": t('c2'),
+            "path": require('../../assets/seasons/ch2.png'),
+            "seasons": [
+                {
+                    "season": 11,
+                    "displayName": t('s1'),
+                    "startDate": "2019-10-15 08:00:00+00:00",
+                    "endDate": "2020-02-20 08:59:59+00:00"
+                },
+                {
+                    "season": 12,
+                    "displayName": t('s2'),
+                    "startDate": "2020-02-20 09:00:00+00:00",
+                    "endDate": "2020-06-17 05:59:59+00:00"
+                },
+                {
+                    "season": 13,
+                    "displayName": t('s3'),
+                    "startDate": "2020-06-17 06:00:00+00:00",
+                    "endDate": "2020-08-27 05:59:59+00:00"
+                },
+                {
+                    "season": 14,
+                    "displayName": t('s4'),
+                    "startDate": "2020-08-27 06:00:00+00:00",
+                    "endDate": "2020-12-02 04:59:59+00:00"
+                },
+                {
+                    "season": 15,
+                    "displayName": t('s5'),
+                    "startDate": "2020-12-02 05:00:00+00:00",
+                    "endDate": "2021-03-16 03:59:59+00:00"
+                },
+                {
+                    "season": 16,
+                    "displayName": t('s6'),
+                    "startDate": "2021-03-16 04:00:00+00:00",
+                    "endDate": "2021-06-08 05:59:59+00:00"
+                },
+                {
+                    "season": 17,
+                    "displayName": t('s7'),
+                    "startDate": "2021-06-08 06:00:00+00:00",
+                    "endDate": "2021-09-13 05:59:59+00:00"
+                },
+                {
+                    "season": 18,
+                    "displayName": t('s8'),
+                    "startDate": "2021-09-13 06:00:00+00:00",
+                    "endDate": "2021-12-04 21:15:00+00:00"
+                }
+            ]
+        },
+        {
+            "chapter": 3,
+            "name": t('c3'),
+            "path": require('../../assets/seasons/ch3.png'),
+            "seasons": [
+                {
+                    "season": 19,
+                    "displayName": t('s1'),
+                    "startDate": "2021-12-05 15:00:00+00:00",
+                    "endDate": "2022-03-20 06:59:59+00:00"
+                },
+                {
+                    "season": 20,
+                    "displayName": t('s2'),
+                    "startDate": "2022-03-20 07:00:00+00:00",
+                    "endDate": "2022-06-05 06:59:59+00:00"
+                },
+                {
+                    "season": 21,
+                    "displayName": t('s3'),
+                    "startDate": "2022-06-05 07:00:00+00:00",
+                    "endDate": "2022-09-18 05:59:59+00:00"
+                },
+                {
+                    "season": 22,
+                    "displayName": t('s4'),
+                    "startDate": "2022-09-18 06:00:00+00:00",
+                    "endDate": "2022-12-03 22:30:00+00:00"
+                }
+            ]
+        },
+        {
+            "chapter": 4,
+            "name": t('c4'),
+            "path": require('../../assets/seasons/ch4.png'),
+            "seasons": [
+                {
+                    "season": 23,
+                    "displayName": t('s1'),
+                    "startDate": "2022-12-04 08:00:00+00:00",
+                    "endDate": "2023-03-10 05:59:59+00:00"
+                },
+                {
+                    "season": 24,
+                    "displayName": t('s2'),
+                    "startDate": "2023-03-10 06:00:00+00:00",
+                    "endDate": "2023-06-09 05:59:59+00:00"
+                },
+                {
+                    "season": 25,
+                    "displayName": t('s4'),
+                    "startDate": "2023-06-09 06:00:00+00:00",
+                    "endDate": "2023-08-25 05:59:59+00:00"
+                },
+                {
+                    "season": 26,
+                    "displayName": t('s5'),
+                    "startDate": "2023-08-25 06:00:00+00:00",
+                    "endDate": "2023-11-03 05:59:59+00:00"
+                },
+                {
+                    "season": 27,
+                    "displayName": t('s_fortnite_og'),
+                    "startDate": "2023-11-03 06:00:00+00:00",
+                    "endDate": "2023-12-03 05:59:59+00:00"
+                }
+            ]
+        },
+        {
+            "chapter": 5,
+            "name": t('c5'),
+            "path": require('../../assets/seasons/ch5.png'),
+            "seasons": [
+                {
+                    "season": 28,
+                    "displayName": t('s1'),
+                    "startDate": "2023-12-03 06:00:00+00:00",
+                    "endDate": "2024-03-08 05:59:59+00:00"
+                },
+                {
+                    "season": 29,
+                    "displayName": t('s2'),
+                    "startDate": "2024-03-08 06:00:00+00:00",
+                    "endDate": "2024-05-24 05:59:59+00:00"
+                }
+            ]
+        }
     ]
 
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}list_cached_data.json`;
@@ -256,9 +472,13 @@ export default function Home({ navigation }) {
     const [searchedCosmetics, setSearchedCosmetics] = useState([])
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [sortType, setSortType] = useState(null)
     const [filterQuery, setFilterQuery] = useState({
-        rarity: null
-    })
+        rarity: [],
+        source: [],
+        tags: [],
+        chapters: []
+    });
     const bottomSheetRef = useRef()
 
     const handleSearch = useCallback((text) => {
@@ -270,25 +490,72 @@ export default function Home({ navigation }) {
     }, []);
 
     const filterCosmetics = useCallback(() => {
+
         let filteredCosmetics = cosmetics;
         if (selected === 0) {
             filteredCosmetics = filteredCosmetics.filter(item => item.name);
         }
+
         if (selected !== 0) {
             filteredCosmetics = filteredCosmetics.filter(item => item.type.id.toLowerCase().includes(cosmeticTypes[selected].id.toLowerCase()));
         }
+
+        if (filterQuery.rarity.length > 0) {
+            filteredCosmetics = filteredCosmetics.filter(item => {
+                return filterQuery.rarity.some(rarity => {
+                    if (rarity.rarityType === "rarity") {
+                        return item.rarity.id.toLowerCase().includes(rarity.rarityId.toLowerCase()) && item.series === null;
+                    } else if (rarity.rarityType === "series") {
+                        return item.series !== null && item.series.id.toLowerCase().includes(rarity.rarityId.toLowerCase());
+                    }
+                    return false;
+                });
+            });
+        }
+
+        if (filterQuery.source.length > 0) {
+            filteredCosmetics = filteredCosmetics.filter(item => {
+                const filterTags = filterQuery.source.flatMap(tag => tag.split(","));
+                return filterTags.some(filterTag => {
+                    if (filterTag === "Cosmetics.Source.Season") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.battlepass !== null
+                    else if (filterTag === "Cosmetics.Source.ItemShop") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.shopHistory !== null
+                    else return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase()))
+                })
+            });
+            console.log(filteredCosmetics.length)
+        }
+
+        if (filterQuery.tags.length > 0) {
+            filteredCosmetics = filteredCosmetics.filter(item => {
+                const filterTags = filterQuery.tags.flatMap(tag => tag.split(","));
+                return filterTags.some(filterTag =>
+                    item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase()))
+                );
+            });
+        }
+
+        if (filterQuery.chapters.length > 0) {
+            filteredCosmetics = filteredCosmetics.filter(item => item.introduction !== null)
+            filteredCosmetics = filteredCosmetics.filter(item => {
+                return filterQuery.chapters.some(chapter => {
+                    return chapter.chapter === item.introduction.chapter && chapter.season === item.introduction.season
+                });
+            });
+        }
+
         if (searchText) {
             filteredCosmetics = filteredCosmetics.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()));
         }
+
         setSearchedCosmetics(filteredCosmetics);
-    }, [cosmetics, searchText, selected]);
+
+    }, [cosmetics, searchText, selected, filterQuery]);
 
     useEffect(() => {
         filterCosmetics();
     }, [filterCosmetics]);
 
     useEffect(() => {
-
         fetchData();
     }, []);
 
@@ -312,7 +579,7 @@ export default function Home({ navigation }) {
                     if (!cachedData) {
 
                         // Fetch data from API if no cached data or expired
-                        const response = await axios('https://fortniteapi.io/v2/items/list?lang=en&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets', {
+                        const response = await axios(`https://fortniteapi.io/v2/items/list?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
                             headers: {
                                 'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
                             }
@@ -324,9 +591,11 @@ export default function Home({ navigation }) {
                         cachedData = JSON.stringify(jsonData.items);
                     }
 
-                    setCosmetics(JSON.parse(cachedData));
-                    setLoading(false); // Set loading to false once data is present
-                    setRefreshing(false); // Set refreshing to false after data is fetched
+                    const removeUnWantedItems = JSON.parse(cachedData).filter(item => item.name !== "")
+                    const list = removeUnWantedItems.sort((a, b) => new Date(a.added.date) - new Date(b.added.date))
+                    setCosmetics(list);
+                    setLoading(false);
+                    setRefreshing(false);
                 })
 
 
@@ -336,17 +605,8 @@ export default function Home({ navigation }) {
         }
     }, [])
 
-    const [fontsLoaded] = useFonts({
-        "BurbankSmall-Black": require('../../assets/fonts/BurbankSmall-Black.otf'),
-    });
-
-    if (!fontsLoaded) {
-        return null
-    }
-
     const onRefresh = useCallback(async () => {
-        setRefreshing(true); // Set refreshing to true when refreshing starts
-        // Clear cache and fetch fresh data
+        setRefreshing(true);
         await FileSystem.getInfoAsync(CACHE_FILE_URI)
             .then(i => {
                 if (i.exists) FileSystem.deleteAsync(CACHE_FILE_URI).then(fetchData);
@@ -410,16 +670,200 @@ export default function Home({ navigation }) {
         }
     }, [])
 
-    const handleRarityButtonClick = (rarityId) => {
-        if (filterQuery.rarity === rarityId) {
-            setFilterQuery({ rarity: null });
-        } else {
-            setFilterQuery({ rarity: rarityId });
+    const toggleFilter = useCallback((filterType, filterId) => {
+        setFilterQuery(prevState => {
+
+            if (filterType === "chapters") {
+                const prevFilters = prevState[filterType];
+                const filterIndex = prevFilters.findIndex(index => index.chapter === filterId.chapter && index.season === filterId.season);
+                if (filterIndex !== -1) {
+                    return {
+                        ...prevState,
+                        [filterType]: prevFilters.filter(id => id.chapter !== filterId.chapter || id.season !== filterId.season)
+                    };
+                } else {
+                    return {
+                        ...prevState,
+                        [filterType]: [...prevFilters, filterId]
+                    };
+                }
+
+            } else if (filterType === "rarity") {
+                const prevFilters = prevState[filterType];
+                const filterIndex = prevFilters.findIndex(index => index.rarityId === filterId.rarityId);
+                if (filterIndex !== -1) {
+                    return {
+                        ...prevState,
+                        [filterType]: prevFilters.filter(id => id.rarityId !== filterId.rarityId)
+                    };
+                } else {
+                    return {
+                        ...prevState,
+                        [filterType]: [...prevFilters, filterId]
+                    };
+                }
+
+            } else {
+                const prevFilters = prevState[filterType];
+                const filterIndex = prevFilters.indexOf(filterId);
+                if (filterIndex !== -1) {
+                    return {
+                        ...prevState,
+                        [filterType]: prevFilters.filter(id => id !== filterId)
+                    };
+                } else {
+                    return {
+                        ...prevState,
+                        [filterType]: [...prevFilters, filterId]
+                    };
+                }
+            }
+        })
+    }, []);
+
+    const resetFilters = () => {
+        setFilterQuery({
+            rarity: [],
+            source: [],
+            tags: [],
+            chapters: []
+        })
+    }
+
+    const sortNewestFirst = () => {
+        setSortType("nf")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => new Date(b.added.date) - new Date(a.added.date));
+        setCosmetics(sortedData);
+
+    }
+
+    const sortOldestFirst = () => {
+        setSortType("of")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => new Date(a.added.date) - new Date(b.added.date));
+        setCosmetics(sortedData);
+    }
+
+    const sortShopLongest = () => {
+        setSortType("sl")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => new Date(a.lastAppearance) - new Date(b.lastAppearance));
+        setCosmetics(sortedData);
+    }
+
+    const sortShopRecent = () => {
+        setSortType("sr")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => new Date(b.lastAppearance) - new Date(a.lastAppearance));
+        setCosmetics(sortedData);
+    }
+
+    function sortATOZ() {
+        setSortType("az")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => {
+            const nameA = a.name.toUpperCase();
+            const nameB = b.name.toUpperCase();
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+        });
+        setCosmetics(sortedData);
+    }
+
+    function sortZTOA() {
+        setSortType("za")
+        const sortedData = [...cosmetics];
+        sortedData.sort((a, b) => {
+            const nameA = a.name.toUpperCase();
+            const nameB = b.name.toUpperCase();
+            if (nameA > nameB) return -1;
+            if (nameA < nameB) return 1;
+            return 0;
+        });
+        setCosmetics(sortedData);
+    }
+
+    const handleRarityButtonClick = useCallback((rarity) => {
+        toggleFilter('rarity', {
+            rarityId: rarity.id,
+            rarityType: rarity.type
+        });
+    }, [toggleFilter]);
+
+    const handleSourceButtonClick = useCallback((sourceId) => {
+        toggleFilter('source', sourceId);
+    }, [toggleFilter]);
+
+    const handleTagsButtonClick = useCallback((tagId) => {
+        toggleFilter('tags', tagId);
+    }, [toggleFilter]);
+
+    const handleChaptersButtonClick = useCallback((chapter) => {
+        toggleFilter('chapters', chapter);
+    }, [toggleFilter]);
+
+    const [fontsLoaded] = useFonts({
+        "BurbankSmall-Black": require('../../assets/fonts/BurbankSmall-Black.otf'),
+        "BurbankSmall-Black-AR": require('../../assets/fonts/Arabic.ttf'),
+    });
+
+    if (!fontsLoaded) {
+        return null
+    }
+
+    function getImagePath(type) {
+        const typeLower = type.toLowerCase();
+        switch (typeLower) {
+            case 'all':
+                return require('../../assets/cosmetics/types/all.png');
+            case 'outfit':
+                return require('../../assets/cosmetics/types/outfit.png');
+            case 'pickaxe':
+                return require('../../assets/cosmetics/types/harvesting_tool.png');
+            case 'emote':
+                return require('../../assets/cosmetics/types/emote.png');
+            case 'glider':
+                return require('../../assets/cosmetics/types/glider.png');
+            case 'backpack':
+                return require('../../assets/cosmetics/types/backbling.png');
+            case 'pet':
+                return require('../../assets/cosmetics/types/pet.png');
+            case 'wrap':
+                return require('../../assets/cosmetics/types/wrap.png');
+            case 'toy':
+                return require('../../assets/cosmetics/types/toy.png');
+            case 'spray':
+                return require('../../assets/cosmetics/types/spray.png');
+            case 'music':
+                return require('../../assets/cosmetics/types/music.png');
+            case 'bannertoken':
+                return require('../../assets/cosmetics/types/banner.png');
+            case 'cosmeticvariant':
+                return require('../../assets/cosmetics/types/style.png');
+            case 'loadingscreen':
+                return require('../../assets/cosmetics/types/loading_screen.png');
+            case 'emoji':
+                return require('../../assets/cosmetics/types/emoticon.png');
+            case 'contrail':
+                return require('../../assets/cosmetics/types/contrail.png');
+            case 'bundle':
+                return require('../../assets/cosmetics/types/item_bundle.png');
+            default:
+                return require('../../assets/cosmetics/types/unknown.png');
         }
-    };
+    }
+
+    function changeLng() {
+
+        i18next.changeLanguage(i18next.language === "ar" ? 'en' : 'ar')
+        I18nManager.forceRTL(i18next.language === "ar" ? true : false)
+        i18next.language === "ar" ? RNRestart.restart() : null
+    }
 
     return (
-        <LinearGradient colors={["#321c53", "#111317"]} style={styles.container}>
+        <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
             <View style={{
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -433,10 +877,10 @@ export default function Home({ navigation }) {
                     marginBottom: 20
                 }}>
 
-                    <TouchableOpacity style={{
+                    <TouchableOpacity onPress={changeLng} style={{
                         flexDirection: 'row',
                     }}>
-                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-medusa-icon-200x200-86c74fce36ff.png' }} style={{
+                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
                             width: 50,
                             height: 50,
                             borderRadius: 25,
@@ -446,7 +890,7 @@ export default function Home({ navigation }) {
                             flexDirection: 'column',
                             marginLeft: 20,
                         }}>
-                            <Text style={{ color: 'white' }}>Good morning</Text>
+                            <Text style={{ color: 'white' }}>{t("good_morning")}</Text>
                             <Text style={{
                                 fontWeight: 'bold',
                                 fontSize: 18,
@@ -461,8 +905,8 @@ export default function Home({ navigation }) {
                 <View style={{
                     width: '90%',
                     height: 40,
-                    backgroundColor: '#222128',
-                    borderRadius: 20,
+                    backgroundColor: '#191919',
+                    borderRadius: 5,
                     flexDirection: 'row',
                     alignItems: 'center',
                     marginBottom: 10,
@@ -472,26 +916,42 @@ export default function Home({ navigation }) {
                         value={searchText}
                         onChangeText={handleSearch}
                         placeholderTextColor={"white"}
-                        placeholder="Search"
+                        placeholder={t("search").toUpperCase()}
                         selectionColor={"white"}
                         cursorColor={"white"}
                         style={{
                             flex: 1,
                             height: 40,
-                            backgroundColor: '#222128',
-                            borderRadius: 5,
                             color: 'white',
                             paddingLeft: 10,
-                            marginRight: 10,
-                        }} />
+                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                        }}
+                    />
 
-                    <TouchableOpacity onPress={() => bottomSheetRef.current?.scrollTo(-385)} style={{
+
+                    <TouchableOpacity onPress={() => {
+                        bottomSheetRef.current?.isActive() ? bottomSheetRef.current?.scrollTo(100) : bottomSheetRef.current?.scrollTo(-385)
+                    }} style={{
                         height: 40,
                         padding: 10,
-                        backgroundColor: '#222128',
+                        backgroundColor: '#191919',
                         borderRadius: 5,
                     }}>
-                        <AntDesign name="filter" color={"white"} size={20} />
+                        <AntDesign name="filter" color={filterQuery.rarity.length > 0 || filterQuery.source.length > 0 || filterQuery.tags.length > 0 || filterQuery.chapters.length > 0 ? "red" : "white"} size={20} />
+                        {
+                            (filterQuery.rarity.length > 0 || filterQuery.source.length > 0 || filterQuery.tags.length > 0 || filterQuery.chapters.length > 0) && (
+                                <View style={{
+                                    backgroundColor: "red",
+                                    width: 4,
+                                    height: 4,
+                                    borderRadius: 2,
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 4,
+                                }} />
+                            )
+                        }
+
                     </TouchableOpacity>
                 </View>
 
@@ -517,15 +977,15 @@ export default function Home({ navigation }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     paddingHorizontal: 15,
-                                    backgroundColor: '#222128',
+                                    backgroundColor: '#191919',
                                     borderRadius: 5,
                                 }}
                             >
-                                {/* <Image cachePolicy='' source={getRarityPath(type.id)} style={{ width: 25, height: 25, tintColor: selected === index ? '#1473FC' : 'white', marginRight: 5 }} /> */}
+                                <Image source={getImagePath(type.id)} style={{ width: 25, height: 25, tintColor: selected === index ? colors.app.secondray : 'white', marginRight: 5 }} />
                                 <Text style={{
-                                    color: selected === index ? '#713bad' : 'white',
-                                    fontWeight: 'bold',
-                                }}>{type.name}</Text>
+                                    color: selected === index ? colors.app.secondray : 'white',
+                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                }}>{type.name.toUpperCase()}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -538,7 +998,6 @@ export default function Home({ navigation }) {
                     keyExtractor={(item, index) => index.toString()}
                     numColumns={3}
                     onEndReachedThreshold={0.1}
-                    // onEndReached={loadMoreItems}
                     removeClippedSubviews={true}
                     maxToRenderPerBatch={20}
                     updateCellsBatchingPeriod={5000}
@@ -552,399 +1011,479 @@ export default function Home({ navigation }) {
             </View>
 
             <Portal>
-                <BottomSheet ref={bottomSheetRef} type='filter' background={{ color: "#111317" }}>
+                <BottomSheet ref={bottomSheetRef} type='filter' background={{ color: "#191919" }}>
                     <View style={{
                         marginTop: 20,
-                        padding: 20,
                     }}>
 
                         <View style={{
-                            alignItems: 'center',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            marginBottom: 20
+                            flex: 1
                         }}>
                             <Text style={{
                                 color: 'white',
                                 fontSize: 18,
-                                fontFamily: "BurbankSmall-Black"
-                            }}>Filter</Text>
+                                paddingHorizontal: 20,
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                            }}>{t("rarity").toUpperCase()}</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginTop: i18next.language === "ar" ? null : 10,
+                                    width: '100%',
+                                }}>
+                                    {
+                                        cosmeticRarities.map((item, index) => (
+                                            // <View key={index}>
+                                            //     <RNGHTouchableOpacity
+                                            //         style={{
+                                            //             marginRight: 5,
+                                            //             height: 60,
+                                            //             borderRadius: 10,
+                                            //             padding: 5,
+                                            //             backgroundColor: "#222128",
+                                            //             alignItems: 'center',
+                                            //             flexDirection: 'row',
+                                            //             justifyContent: 'center',
+                                            //         }}
+                                            //         onPress={() => handleRarityButtonClick(item)} // Handle button click
+                                            //     >
+                                            //         <Image
+                                            //             style={{ marginRight: 5, width: 50, height: 50, borderWidth: 2, borderRadius: 10, borderColor: filterQuery.rarity.find(rarity => rarity.rarityId === item.id) ? colors.cosmetics[item.id].colors.Color2 : colors.cosmetics[item.id].colors.Color1 }} // Added style for the image
+                                            //             source={getRarityPath(item.id)}
+                                            //         />
+                                            //         <Text
+                                            //             style={{
+                                            //                 color: colors.cosmetics[item.id].colors.Color1,
+                                            //                 textAlign: 'center',
+                                            //                 marginRight: 20,
+                                            //                 fontSize: 17,
+                                            //                 fontFamily: "BurbankSmall-Black"
+                                            //             }}
+                                            //         >
+                                            //             {item.name.toUpperCase()}
+                                            //         </Text>
+                                            //     </RNGHTouchableOpacity>
+                                            // </View>
 
-                            <RNGHTouchableOpacity>
-                                <Text style={{
-                                    color: '#613497',
-                                    fontSize: 18,
-                                    fontFamily: "BurbankSmall-Black"
-                                }}>Reset</Text>
-                            </RNGHTouchableOpacity>
-                        </View>
-                    </View>
+                                            <View key={index}>
+                                                <RNGHTouchableOpacity
+                                                    style={{
+                                                        marginRight: 5,
+                                                        height: 60,
+                                                        borderRadius: 10,
+                                                        alignItems: 'center',
+                                                        flexDirection: 'row',
+                                                        justifyContent: 'center',
 
-                    <View style={{
-                        flex: 1
-                    }}>
-                        <Text style={{
-                            color: 'white',
-                            fontSize: 18,
-                            paddingLeft: 20,
-                            fontFamily: "BurbankSmall-Black"
-                        }}>RARITY</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginTop: 10,
-                                width: '100%',
-                            }}>
-                                {
-                                    cosmeticRarities.map((item, index) => (
-                                        <View key={index}>
-                                            <RNGHTouchableOpacity
-                                                style={{
-                                                    marginRight: 5,
-                                                    height: 60,
-                                                    borderRadius: 10,
-                                                    paddingHorizontal: 20,
-                                                    backgroundColor: colors[item.id].colors.Color1,
-                                                    alignItems: 'center',
-                                                    flexDirection: 'row',
-                                                    justifyContent: 'center',
-                                                    borderWidth: 2
-                                                }}
-                                                onPress={() => handleRarityButtonClick(item.id)} // Handle button click
-                                            >
-                                                <Image
-                                                    style={{ height: '100%', width: 'auto' }}
-                                                    source={getRarityPath(item.id)}
-                                                    contentFit='fill'
+                                                    }}
+                                                    onPress={() => handleRarityButtonClick(item)} // Handle button click
                                                 >
-                                                    {/* <Text
+                                                    <Image
+                                                        style={{ flex: 1, width: 'auto', height: 60, borderWidth: 2, contentFit: 'cover', paddingHorizontal: 25, borderRadius: 10, borderColor: filterQuery.rarity.find(rarity => rarity.rarityId === item.id) ? colors.cosmetics[item.id].colors.Color2 : colors.cosmetics[item.id].colors.Color1 }} // Added style for the image
+                                                        source={getRarityPath(item.id)}
+                                                    />
+
+                                                </RNGHTouchableOpacity>
+                                            </View>
+
+                                        ))
+
+                                    }
+                                </View>
+                            </ScrollView>
+                        </View>
+
+                        <View style={{
+                            flex: 1,
+                            marginTop: i18next.language === "ar" ? null : 10,
+                        }}>
+                            <Text style={{
+                                color: 'white',
+                                fontSize: 18,
+                                paddingHorizontal: 20,
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                            }}>{t("source").toUpperCase()}</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginTop: i18next.language === "ar" ? null : 10,
+                                    width: '100%',
+                                }}>
+                                    {
+                                        cosmeticSources.map((item, index) => (
+                                            <View key={index}>
+                                                <RNGHTouchableOpacity
+                                                    style={{
+                                                        marginRight: 5,
+                                                        height: 60,
+                                                        borderRadius: 10,
+                                                        padding: 5,
+                                                        backgroundColor: "#222128",
+                                                        alignItems: 'center',
+                                                        flexDirection: 'row',
+                                                        justifyContent: 'center',
+                                                        borderWidth: filterQuery.source.find(source => source === item.id) ? 2 : null,
+                                                        borderColor: filterQuery.source.find(source => source === item.id) ? colors.app.buttons : null
+                                                    }}
+                                                    onPress={() => handleSourceButtonClick(item.id)} // Handle button click
+                                                >
+                                                    <LinearGradient colors={item.colors} style={{
+                                                        padding: 10,
+                                                        borderRadius: 10,
+                                                        marginRight: 5,
+                                                    }}>
+                                                        {
+                                                            item.type === "image" ? (
+                                                                <Image
+                                                                    style={{ width: 30, height: 30 }}
+                                                                    source={item.path}
+                                                                    contentFit='contain'
+                                                                />
+                                                            ) : item.type === "emoji" ? (
+                                                                <Text
+                                                                    style={{
+                                                                        textAlign: 'center',
+                                                                        fontSize: 25,
+                                                                        color: "white",
+                                                                        fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                                    }}
+                                                                >
+                                                                    {item.emoji}
+                                                                </Text>
+                                                            ) : null
+                                                        }
+
+                                                    </LinearGradient>
+                                                    <Text
                                                         style={{
-                                                            color: colors[item.id].colors.Color3,
                                                             textAlign: 'center',
-                                                            fontSize: 15,
-                                                            fontFamily: "BurbankSmall-Black"
+                                                            marginRight: 20,
+                                                            fontSize: 17,
+                                                            color: "white",
+                                                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
                                                         }}
                                                     >
                                                         {item.name.toUpperCase()}
-                                                    </Text> */}
-                                                </Image>
+                                                    </Text>
+                                                </RNGHTouchableOpacity>
+                                            </View>
 
-                                            </RNGHTouchableOpacity>
-                                        </View>
+                                        ))
 
-                                    ))
+                                    }
+                                </View>
+                            </ScrollView>
+                        </View>
 
-                                }
-                            </View>
-                        </ScrollView>
-                    </View>
-
-                    <View style={{
-                        flex: 1,
-                        marginTop: 10
-                    }}>
-                        <Text style={{
-                            color: 'white',
-                            fontSize: 18,
-                            paddingLeft: 20,
-                            fontFamily: "BurbankSmall-Black"
-                        }}>SOURCES</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginTop: 10,
-                                width: '100%',
-                            }}>
-                                {
-                                    cosmeticSources.map((item, index) => (
-                                        <View key={index}>
-                                            <RNGHTouchableOpacity
-                                                style={{
-                                                    marginRight: 5,
-                                                    height: 60,
-                                                    borderRadius: 10,
-                                                    padding: 5,
-                                                    backgroundColor: "#222128",
-                                                    alignItems: 'center',
-                                                    flexDirection: 'row',
-                                                    justifyContent: 'center',
-                                                }}
-                                                onPress={() => handleRarityButtonClick(item.id)} // Handle button click
-                                            >
-                                                <LinearGradient colors={item.colors} style={{
-                                                    padding: 10,
-                                                    borderRadius: 10,
-                                                    marginRight: 5,
-                                                }}>
-                                                    {
-                                                        item.type === "image" ? (
-                                                            <Image
-                                                                style={{ width: 30, height: 30 }}
-                                                                source={item.path}
-                                                                contentFit='contain'
-                                                            />
-                                                        ) : item.type === "emoji" ? (
-                                                            <Text
-                                                                style={{
-                                                                    textAlign: 'center',
-                                                                    fontSize: 25,
-                                                                    color: "white",
-                                                                    fontFamily: "BurbankSmall-Black"
-                                                                }}
-                                                            >
-                                                                {item.emoji}
-                                                            </Text>
-                                                        ) : null
-                                                    }
-
-                                                </LinearGradient>
-                                                <Text
-                                                    style={{
-                                                        textAlign: 'center',
-                                                        marginRight: 20,
-                                                        fontSize: 17,
-                                                        color: "white",
-                                                        fontFamily: "BurbankSmall-Black"
-                                                    }}
-                                                >
-                                                    {item.name.toUpperCase()}
-                                                </Text>
-                                            </RNGHTouchableOpacity>
-                                        </View>
-
-                                    ))
-
-                                }
-                            </View>
-                        </ScrollView>
-                    </View>
-
-                    <View style={{
-                        flex: 1,
-                        marginTop: 10
-                    }}>
-                        <Text style={{
-                            color: 'white',
-                            fontSize: 18,
-                            paddingLeft: 20,
-                            fontFamily: "BurbankSmall-Black"
-                        }}>TAGS</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginTop: 10,
-                                width: '100%',
-                            }}>
-                                {
-                                    cosmeticTags.map((item, index) => (
-                                        <View key={index}>
-                                            <RNGHTouchableOpacity
-                                                style={{
-                                                    marginRight: 5,
-                                                    height: 60,
-                                                    borderRadius: 10,
-                                                    padding: 5,
-                                                    backgroundColor: "#222128",
-                                                    alignItems: 'center',
-                                                    flexDirection: 'row',
-                                                    justifyContent: 'center',
-                                                }}
-                                                onPress={() => handleRarityButtonClick(item.id)} // Handle button click
-                                            >
-                                                <View style={{
-                                                    padding: 10,
-                                                    borderRadius: 10,
-                                                    backgroundColor: '#424448',
-                                                    marginRight: 5
-                                                }}>
-                                                    <Image
-                                                        style={{ width: 30, height: 30 }}
-                                                        source={getTagsPath(item.id)}
-                                                        contentFit='contain'
-                                                    />
-                                                </View>
-                                                <Text
-                                                    style={{
-                                                        textAlign: 'center',
-                                                        marginRight: 20,
-                                                        fontSize: 17,
-                                                        color: "white",
-                                                        fontFamily: "BurbankSmall-Black"
-                                                    }}
-                                                >
-                                                    {item.name.toUpperCase()}
-                                                </Text>
-                                            </RNGHTouchableOpacity>
-                                        </View>
-
-                                    ))
-
-                                }
-                            </View>
-                        </ScrollView>
-                    </View>
-
-                    <View style={{
-                        marginTop: 10,
-                        paddingHorizontal: 20,
-                    }}>
                         <View style={{
-                            marginBottom: 10
+                            flex: 1,
+                            marginTop: i18next.language === "ar" ? null : 10,
                         }}>
                             <Text style={{
                                 color: 'white',
                                 fontSize: 18,
-                                marginBottom: 10,
-                                fontFamily: "BurbankSmall-Black"
-                            }}>SORT</Text>
-
-                            <View>
-
+                                paddingHorizontal: 20,
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                            }}>{t("tag").toUpperCase()}</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                                 <View style={{
                                     flexDirection: 'row',
-                                    marginBottom: 5
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginTop: i18next.language === "ar" ? null : 10,
+                                    width: '100%',
                                 }}>
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>NEWEST FIRST</Text>
-                                    </RNGHTouchableOpacity>
+                                    {
+                                        cosmeticTags.map((item, index) => (
+                                            <View key={index}>
+                                                <RNGHTouchableOpacity
+                                                    style={{
+                                                        marginRight: 5,
+                                                        height: 60,
+                                                        borderRadius: 10,
+                                                        padding: 5,
+                                                        backgroundColor: "#222128",
+                                                        alignItems: 'center',
+                                                        flexDirection: 'row',
+                                                        justifyContent: 'center',
+                                                        borderWidth: filterQuery.tags.find(source => source === item.id) ? 2 : null,
+                                                        borderColor: filterQuery.tags.find(source => source === item.id) ? colors.app.buttons : null
+                                                    }}
+                                                    onPress={() => handleTagsButtonClick(item.id)}
+                                                >
+                                                    <View style={{
+                                                        padding: 10,
+                                                        borderRadius: 10,
+                                                        backgroundColor: '#424448',
+                                                        marginRight: 5
+                                                    }}>
+                                                        <Image
+                                                            style={{ width: 30, height: 30 }}
+                                                            source={getTagsPath(item.id)}
+                                                            contentFit='contain'
+                                                        />
+                                                    </View>
+                                                    <Text
+                                                        style={{
+                                                            textAlign: 'center',
+                                                            marginRight: 20,
+                                                            fontSize: 17,
+                                                            color: "white",
+                                                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                        }}
+                                                    >
+                                                        {item.name.toUpperCase()}
+                                                    </Text>
+                                                </RNGHTouchableOpacity>
+                                            </View>
 
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>OLDEST FIRST</Text>
-                                    </RNGHTouchableOpacity>
+                                        ))
+
+                                    }
                                 </View>
-
-                                <View style={{
-                                    flexDirection: 'row',
-                                    marginBottom: 5
-                                }}>
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>SERIES</Text>
-                                    </RNGHTouchableOpacity>
-
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>RARITY</Text>
-                                    </RNGHTouchableOpacity>
-                                </View>
-
-                                <View style={{
-                                    flexDirection: 'row',
-                                    marginBottom: 5
-                                }}>
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>NEW ADDED</Text>
-                                    </RNGHTouchableOpacity>
-
-                                    <RNGHTouchableOpacity style={{
-                                        marginRight: 5,
-                                        height: 60,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        backgroundColor: '#222128',
-                                        alignItems: 'center',
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        width: 170
-                                    }}>
-                                        <Text style={{
-                                            color: 'white',
-                                            fontSize: 18,
-                                            fontFamily: "BurbankSmall-Black"
-                                        }}>SHOP</Text>
-                                    </RNGHTouchableOpacity>
-                                </View>
-
-                            </View>
+                            </ScrollView>
                         </View>
 
-                        <RNGHTouchableOpacity style={{
-                            paddingHorizontal: 20,
-                            paddingVertical: 15,
-                            backgroundColor: '#9433ff',
-                            borderRadius: 10
+                        <View style={{
+                            flex: 1,
+                            marginTop: i18next.language === "ar" ? null : 10,
                         }}>
                             <Text style={{
-                                fontSize: 20,
-                                textAlign: 'center',
                                 color: 'white',
-                                fontFamily: "BurbankSmall-Black"
-                            }}>APPLY FILTERS</Text>
-                        </RNGHTouchableOpacity>
+                                fontSize: 18,
+                                paddingHorizontal: 20,
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                            }}>{t("season").toUpperCase()}</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginTop: i18next.language === "ar" ? null : 10,
+                                    width: '100%',
+                                }}>
+                                    {
+                                        cosmeticChapters.map((chapter, index) => {
+                                            return chapter.seasons.map((season, i) => (
+                                                <View key={`${index}-${i}`}>
+                                                    <RNGHTouchableOpacity
+                                                        style={{
+                                                            marginRight: 5,
+                                                            height: 60,
+                                                            borderRadius: 10,
+                                                            padding: 5,
+                                                            backgroundColor: "#222128",
+                                                            alignItems: 'center',
+                                                            flexDirection: 'row',
+                                                            justifyContent: 'center',
+                                                            borderWidth: filterQuery.chapters.find(cs => cs.chapter === chapter.name && cs.season === season.displayName) ? 2 : null,
+                                                            borderColor: filterQuery.chapters.find(cs => cs.chapter === chapter.name && cs.season === season.displayName) ? colors.app.buttons : null
+                                                        }}
+                                                        onPress={() => handleChaptersButtonClick({
+                                                            chapter: chapter.name,
+                                                            season: season.displayName
+                                                        })}
+                                                    >
+                                                        <Image
+                                                            style={{
+                                                                width: 50, height: 50, borderRadius: 10, marginRight: 5
+                                                            }}
+                                                            source={chapter.path}
+                                                            contentFit='contain'
+                                                        />
+                                                        <Text
+                                                            style={{
+                                                                textAlign: 'center',
+                                                                marginRight: 20,
+                                                                fontSize: 17,
+                                                                color: "white",
+                                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                            }}
+                                                        >
+                                                            {chapter.name.toUpperCase()} {season.displayName.toUpperCase()}
+                                                        </Text>
+                                                    </RNGHTouchableOpacity>
+                                                </View>
+                                            ))
+                                        })
+
+                                    }
+                                </View>
+                            </ScrollView>
+                        </View>
+
+                        <View style={{
+                            marginTop: i18next.language === "ar" ? null : 10,
+                            paddingHorizontal: 20,
+                        }}>
+                            <View style={{
+                                marginBottom: 10
+                            }}>
+                                <Text style={{
+                                    color: 'white',
+                                    fontSize: 18,
+                                    marginBottom: i18next.language === "ar" ? null : 10,
+                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                }}>{t("sort").toUpperCase()}</Text>
+
+                                <View>
+
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        marginBottom: 5
+                                    }}>
+                                        <RNGHTouchableOpacity onPress={sortNewestFirst} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "nf" ? 2 : null,
+                                            borderColor: sortType === "nf" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("newest_first").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+
+                                        <RNGHTouchableOpacity onPress={sortOldestFirst} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "of" ? 2 : null,
+                                            borderColor: sortType === "of" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("oldest_first").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+                                    </View>
+
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        marginBottom: 5
+                                    }}>
+                                        <RNGHTouchableOpacity onPress={sortShopRecent} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "sr" ? 2 : null,
+                                            borderColor: sortType === "sr" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("shop_recent").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+
+                                        <RNGHTouchableOpacity onPress={sortShopLongest} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "sl" ? 2 : null,
+                                            borderColor: sortType === "sl" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("shop_longest").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+                                    </View>
+
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        marginBottom: 5
+                                    }}>
+                                        <RNGHTouchableOpacity onPress={sortATOZ} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "az" ? 2 : null,
+                                            borderColor: sortType === "az" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("atoz").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+
+                                        <RNGHTouchableOpacity onPress={sortZTOA} style={{
+                                            marginRight: 5,
+                                            height: 60,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            backgroundColor: '#222128',
+                                            alignItems: 'center',
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            width: 170,
+                                            borderWidth: sortType === "za" ? 2 : null,
+                                            borderColor: sortType === "za" ? colors.app.buttons : null,
+                                        }}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 18,
+                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                            }}>{t("ztoa").toUpperCase()}</Text>
+                                        </RNGHTouchableOpacity>
+                                    </View>
+
+                                </View>
+                            </View>
+
+                            <RNGHTouchableOpacity onPress={resetFilters} style={{
+                                paddingHorizontal: 20,
+                                paddingVertical: 15,
+                                backgroundColor: colors.app.buttons,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{
+                                    fontSize: 20,
+                                    textAlign: 'center',
+                                    color: 'white',
+                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                }}>{t("reset_filters").toUpperCase()}</Text>
+                            </RNGHTouchableOpacity>
+                        </View>
                     </View>
 
                 </BottomSheet>

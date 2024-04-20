@@ -17,8 +17,11 @@ import { useFonts } from 'expo-font';
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import { useTranslation } from 'react-i18next';
+import i18next from '../../localization/i18n.js'
 
 export default function Details({ navigation }) {
+    const { t } = useTranslation()
     const [modalVisible, setModalVisible] = useState(false);
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const route = useRoute();
@@ -65,6 +68,7 @@ export default function Details({ navigation }) {
 
     const [fontsLoaded] = useFonts({
         "Burbank": require('../../assets/fonts/BurbankBigCondensed-Black.ttf'),
+        "BurbankSmall": require('../../assets/fonts/Lalezar-Regular.ttf'),
     });
 
     useEffect(() => {
@@ -115,14 +119,14 @@ export default function Details({ navigation }) {
         const days = Math.floor(hours / 24);
 
         if (days > 0) {
-            return `${days} days ago at ${formatAMPM(dateTime)}`;
+            return `${days} ${t('days_ago_at')} ${formatAMPM(dateTime)}`;
         } else if (hours > 0) {
-            return `${hours} hours ago at ${formatAMPM(dateTime)}`;
+            return `${hours} ${t('hours_ago_at')} ${formatAMPM(dateTime)}`;
         } else if (minutes > 0) {
-            return `${minutes} minutes ago at ${formatAMPM(dateTime)}`;
+            return `${minutes} ${t('minutes_ago_at')} ${formatAMPM(dateTime)}`;
         } else {
             dateTime
-            return `${seconds} seconds ago at ${formatAMPM(dateTime)}`;
+            return `${seconds} ${t('seconds_ago_at')} ${formatAMPM(dateTime)}`;
         }
     }
 
@@ -356,7 +360,7 @@ export default function Details({ navigation }) {
                 }
             </View>
 
-            <BottomSheet ref={bottomSheetRef} type='details' onTranslationYChange={handleTranslationYChange} background={colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
+            <BottomSheet ref={bottomSheetRef} type='details' onTranslationYChange={handleTranslationYChange} background={colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
                 <View style={{
                     marginTop: 20,
                     marginHorizontal: 20,
@@ -369,7 +373,7 @@ export default function Details({ navigation }) {
                     }}>
                         <View style={{
                             padding: 4,
-                            backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
+                            backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
                             flexDirection: 'row',
                             alignItems: 'left',
                             justifyContent: 'center',
@@ -378,13 +382,13 @@ export default function Details({ navigation }) {
                             <Image source={getImagePath(receivedData.type.id)} style={{
                                 width: 15,
                                 height: 15,
-                                tintColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                tintColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
                                 marginRight: 5,
                                 marginLeft: 5
                             }} />
                             <Text style={{
-                                color: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
-                                fontFamily: "Burbank",
+                                color: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank",
                                 marginRight: 5,
                                 textAlign: 'center',
                                 justifyContent: 'center'
@@ -404,7 +408,7 @@ export default function Details({ navigation }) {
                                 color: "white",
                                 marginLeft: 5,
                                 fontSize: 30,
-                                fontFamily: "Burbank"
+                                fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank"
                             }}>{receivedData.name.toUpperCase()}</Text>
 
                             <RNGHTouchableOpacity onPress={handleBookmarkToggle} style={{
@@ -412,7 +416,7 @@ export default function Details({ navigation }) {
                                 width: 40,
                                 elevation: 10,
                                 borderRadius: 5,
-                                backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
+                                backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}>
@@ -441,7 +445,7 @@ export default function Details({ navigation }) {
                                     <Text style={{
                                         color: "white",
                                         fontSize: 25,
-                                        fontFamily: "Burbank"
+                                        fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank"
                                     }}>{receivedData.battlepass.displayText.chapterSeason.toUpperCase()}</Text>
                                 </View>
                             ) : (
@@ -487,7 +491,7 @@ export default function Details({ navigation }) {
                                                     borderRadius: 5,
                                                 }}>
                                                     <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} resizeMode='contain' />
-                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: index === styleIndex ? colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
+                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: index === styleIndex ? colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
                                                 </RNGHTouchableOpacity>
                                             </View>
 
@@ -510,35 +514,35 @@ export default function Details({ navigation }) {
                         padding: 10,
                     }}>
                         <View style={styles.row}>
-                            <Text style={styles.label}>Description</Text>
+                            <Text style={styles.label}>{t('description')}</Text>
                             <Text style={{ color: 'white' }}>{receivedData.description}</Text>
                         </View>
 
                         <View style={styles.row}>
-                            <Text style={styles.label}>Introduction</Text>
-                            <Text style={{ color: 'white' }}>{receivedData.introduction ? receivedData.introduction.text : "No data"}</Text>
+                            <Text style={styles.label}>{t('introduction')}</Text>
+                            <Text style={{ color: 'white' }}>{receivedData.introduction ? receivedData.introduction.text : t('no_introduction')}</Text>
                         </View>
 
                         <View style={styles.row}>
-                            <Text style={styles.label}>Set</Text>
-                            <Text style={{ color: 'white' }}>{receivedData.set !== null ? receivedData.set.partOf : "This cosmetic is not a part of any Fortnite set."}</Text>
+                            <Text style={styles.label}>{t('set')}</Text>
+                            <Text style={{ color: 'white' }}>{receivedData.set !== null ? receivedData.set.partOf : t('no_set')}</Text>
                         </View>
 
                         <View style={styles.row}>
-                            <Text style={styles.label}>First Seen</Text>
-                            <Text style={{ color: 'white' }}>{receivedData.releaseDate ? formatTimeAgo(receivedData.releaseDate) : 'Never Released'}</Text>
+                            <Text style={styles.label}>{t('first_seen')}</Text>
+                            <Text style={{ color: 'white' }}>{receivedData.releaseDate ? formatTimeAgo(receivedData.releaseDate) : t('never_released')}</Text>
                         </View>
 
                         <View style={styles.row}>
-                            <Text style={styles.label}>Last Seen</Text>
-                            <Text style={{ color: 'white' }}>{receivedData.lastAppearance ? formatTimeAgo(receivedData.lastAppearance) : 'Never Released'}</Text>
+                            <Text style={styles.label}>{t('last_seen')}</Text>
+                            <Text style={{ color: 'white' }}>{receivedData.lastAppearance ? formatTimeAgo(receivedData.lastAppearance) : t('never_released')}</Text>
                         </View>
                     </View>
 
                     <RNGHTouchableOpacity style={{
                         marginTop: 10,
                         width: '100%',
-                        backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
+                        backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1,
                         paddingVertical: 5,
                         borderRadius: 5,
                         justifyContent: 'center',
@@ -549,55 +553,55 @@ export default function Details({ navigation }) {
                         <Text style={{
                             color: 'white',
                             fontSize: 25,
-                            fontFamily: "Burbank"
-                        }}>REMIND ME</Text>
+                            fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank"
+                        }}>{t('remind_me')}</Text>
                     </RNGHTouchableOpacity>
 
                     <Text style={{
                         color: 'white',
                         fontSize: 10
                     }}>
-                        By opting for the 'Remind Me' feature, you'll receive a notification as soon as this item becomes available in the itemshop, ensuring you don't miss out on its arrival.
+                        {t('remind_me_desc')}
                     </Text>
 
                     <View>
                         <Text style={{
                             color: 'white',
-                            fontFamily: 'Burbank',
+                            fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank",
                             marginTop: 10,
                             fontSize: 20,
-                        }}>RATE {receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()}</Text>
+                        }}>{t('rate')} {receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()}</Text>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '20%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '20%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>😱</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>20%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '44%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '44%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>❤️</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>44%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '51%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '51%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🙂</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>51%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '33%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '33%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🤢</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>33%</Text>
                         </RNGHTouchableOpacity>
 
-                        <RNGHTouchableOpacity style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
-                            <View style={[{ backgroundColor: colors[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '12%' }, styles.TouchableOpacityStyle]}>
+                        <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
+                            <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '12%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>💩</Text>
                             </View>
                             <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>12%</Text>
@@ -605,7 +609,7 @@ export default function Details({ navigation }) {
                         <Text style={{
                             color: 'white',
                             fontSize: 10
-                        }}>Total of 6231 votes</Text>
+                        }}>{t('voters_p1')} 6231 {t('voters_p2')}</Text>
 
                     </View>
 
@@ -614,11 +618,11 @@ export default function Details({ navigation }) {
                             <View>
                                 <Text style={{
                                     color: 'white',
-                                    fontFamily: 'Burbank',
+                                    fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank",
                                     marginTop: 10,
                                     fontSize: 20,
                                     textAlign: 'left',
-                                }}>{receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()} ASSETS</Text>
+                                }}>{receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()} {t('assets')}</Text>
 
                                 <View style={{
                                     justifyContent: 'center',
@@ -699,6 +703,6 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 25,
         color: 'white',
-        fontFamily: 'Burbank',
+        fontFamily: i18next.language === "ar" ? "BurbankSmall" : "Burbank"
     },
 });

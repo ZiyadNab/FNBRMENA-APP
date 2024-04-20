@@ -49,13 +49,19 @@ const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
     const scrollY = useSharedValue(0);
 
     const checkSheetActive = () => {
-      if (active.value) scrollTo(-385)
-      else if (children) scrollTo(-700)
+      if (type === "details") {
+        if (active.value) scrollTo(-385)
+        else if (children) scrollTo(-700)
+      } else {
+        if (!active.value) scrollTo(-385)
+        else if (children) scrollTo(-700)
+      }
     }
 
     const scrollTo = useCallback((destination: number) => {
       'worklet';
-      active.value = destination !== -385;
+      if (type === "details") active.value = destination !== -385;
+      else active.value = destination === -385;
 
       translateY.value = withSpring(destination, { damping: 15 });
       if (onTranslationYChange) runOnJS(onTranslationYChange)(destination, true);
