@@ -36,9 +36,9 @@ export default function Itemshop({ navigation }) {
                             flexDirection: 'column',
                             marginLeft: 20,
                         }}>
-                            <Text style={{ color: 'white' }}>Good morning</Text>
+                            <Text style={{ color: 'white', fontFamily: "" }}>Good morning</Text>
                             <Text style={{
-                                fontWeight: 'bold',
+                                fontFamily: "Arabic",
                                 fontSize: 18,
                                 color: 'white'
                             }}>OHY_</Text>

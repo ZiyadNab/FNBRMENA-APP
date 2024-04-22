@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { StatusBar } from 'react-native';
-import { StyleSheet, Platform, View, Animated, Dimensions, Keyboard } from 'react-native';
+import { StyleSheet, Animated, Dimensions, Keyboard } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ import 'react-native-reanimated'
 import { PortalProvider } from '@gorhom/portal'
 import i18next from './localization/i18n.js'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -203,6 +204,14 @@ export default function App() {
     loadLanguage()
   }, [])
 
+  // const [fontLoaded] = useFonts({
+  //   "BurbankBigCondensed-Black": require('./assets/fonts/BurbankBigCondensed-Black.ttf'),
+  //   "BurbankSmall-Black": require('./assets/fonts/BurbankSmall-Black.otf'),
+  //   "Lalezar-Regular": require('./assets/fonts/Lalezar-Regular.ttf'),
+  // });
+
+  // if(!fontLoaded) return null
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
@@ -230,7 +239,6 @@ export default function App() {
     </GestureHandlerRootView>
 
   )
-
 }
 
 const styles = StyleSheet.create({

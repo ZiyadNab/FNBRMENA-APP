@@ -13,14 +13,13 @@ import BottomSheet from '../helpers/BottomSheet';
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { Portal } from '@gorhom/portal'
 import colors from '../../colors.json'
-import { useFonts } from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import i18next from '../../localization/i18n.js'
-import RNRestart from 'react-native-restart'
 
 export default function Home({ navigation }) {
     const { t } = useTranslation()
+    let cachedLanguage = i18next.language;
 
     const cosmeticTypes = [
         {
@@ -96,7 +95,7 @@ export default function Home({ navigation }) {
     const cosmeticRarities = [
         {
             "id": "Legendary",
-            "name": t('legendary')
+            "name": t('legendary'),
         },
         {
             "id": "Epic",
@@ -253,214 +252,266 @@ export default function Home({ navigation }) {
 
     const cosmeticChapters = [
         {
+            "season": 1,
             "chapter": 1,
-            "name": t('c1'),
-            "path": require('../../assets/seasons/ch1.png'),
-            "seasons": [
-                {
-                    "season": 1,
-                    "displayName": t('s1'),
-                    "startDate": "2017-10-24 09:00:00+00:00",
-                    "endDate": "2017-12-14 08:59:59+00:00"
-                },
-                {
-                    "season": 2,
-                    "displayName": t('s2'),
-                    "startDate": "2017-12-14 09:00:00+00:00",
-                    "endDate": "2018-02-22 08:59:59+00:00"
-                },
-                {
-                    "season": 3,
-                    "displayName": t('s3'),
-                    "startDate": "2018-02-22 09:00:00+00:00",
-                    "endDate": "2018-05-01 08:59:59+00:00"
-                },
-                {
-                    "season": 4,
-                    "displayName": t('s4'),
-                    "startDate": "2018-05-01 09:00:00+00:00",
-                    "endDate": "2018-07-11 08:59:59+00:00"
-                },
-                {
-                    "season": 5,
-                    "displayName": t('s5'),
-                    "startDate": "2018-07-11 09:00:00+00:00",
-                    "endDate": "2018-09-27 08:59:59+00:00"
-                },
-                {
-                    "season": 6,
-                    "displayName": t('s6'),
-                    "startDate": "2018-09-27 09:00:00+00:00",
-                    "endDate": "2018-12-06 08:59:59+00:00"
-                },
-                {
-                    "season": 7,
-                    "displayName": t('s7'),
-                    "startDate": "2018-12-06 09:00:00+00:00",
-                    "endDate": "2019-02-28 07:59:59+00:00"
-                },
-                {
-                    "season": 8,
-                    "displayName": t('s8'),
-                    "startDate": "2019-02-28 08:00:00+00:00",
-                    "endDate": "2019-05-09 07:59:59+00:00"
-                },
-                {
-                    "season": 9,
-                    "displayName": t('s9'),
-                    "startDate": "2019-05-09 08:00:00+00:00",
-                    "endDate": "2019-08-01 07:59:59+00:00"
-                },
-                {
-                    "season": 10,
-                    "displayName": t('s10'),
-                    "startDate": "2019-08-01 08:00:00+00:00",
-                    "endDate": "2019-10-13 18:00:00+00:00"
-                }
-            ]
+            "seasonInChapter": 1,
+            "displayName": t("s1"),
+            "startDate": "2017-10-24 09:00:00+00:00",
+            "endDate": "2017-12-14 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s1.png')
         },
         {
+            "season": 2,
+            "chapter": 1,
+            "seasonInChapter": 2,
+            "displayName": t("s2"),
+            "startDate": "2017-12-14 09:00:00+00:00",
+            "endDate": "2018-02-22 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s2.png')
+        },
+        {
+            "season": 3,
+            "chapter": 1,
+            "seasonInChapter": 3,
+            "displayName": t("s3"),
+            "startDate": "2018-02-22 09:00:00+00:00",
+            "endDate": "2018-05-01 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s3.png')
+        },
+        {
+            "season": 4,
+            "chapter": 1,
+            "seasonInChapter": 4,
+            "displayName": t("s4"),
+            "startDate": "2018-05-01 09:00:00+00:00",
+            "endDate": "2018-07-11 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s4.png')
+        },
+        {
+            "season": 5,
+            "chapter": 1,
+            "seasonInChapter": 5,
+            "displayName": t("s5"),
+            "startDate": "2018-07-11 09:00:00+00:00",
+            "endDate": "2018-09-27 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s5.png')
+        },
+        {
+            "season": 6,
+            "chapter": 1,
+            "seasonInChapter": 6,
+            "displayName": t("s6"),
+            "startDate": "2018-09-27 09:00:00+00:00",
+            "endDate": "2018-12-06 08:59:59+00:00",
+            "path": require('../../assets/seasons/c1s6.png')
+        },
+        {
+            "season": 7,
+            "chapter": 1,
+            "seasonInChapter": 7,
+            "displayName": t("s7"),
+            "startDate": "2018-12-06 09:00:00+00:00",
+            "endDate": "2019-02-28 07:59:59+00:00",
+            "path": require('../../assets/seasons/c1s7.png')
+        },
+        {
+            "season": 8,
+            "chapter": 1,
+            "seasonInChapter": 8,
+            "displayName": t("s8"),
+            "startDate": "2019-02-28 08:00:00+00:00",
+            "endDate": "2019-05-09 07:59:59+00:00",
+            "path": require('../../assets/seasons/c1s8.png')
+        },
+        {
+            "season": 9,
+            "chapter": 1,
+            "seasonInChapter": 9,
+            "displayName": t("s9"),
+            "startDate": "2019-05-09 08:00:00+00:00",
+            "endDate": "2019-08-01 07:59:59+00:00",
+            "path": require('../../assets/seasons/c1s9.png')
+        },
+        {
+            "season": 10,
+            "chapter": 1,
+            "seasonInChapter": 10,
+            "displayName": t("s10"),
+            "startDate": "2019-08-01 08:00:00+00:00",
+            "endDate": "2019-10-13 18:00:00+00:00",
+            "path": require('../../assets/seasons/c1s10.png')
+        },
+        {
+            "season": 11,
             "chapter": 2,
-            "name": t('c2'),
-            "path": require('../../assets/seasons/ch2.png'),
-            "seasons": [
-                {
-                    "season": 11,
-                    "displayName": t('s1'),
-                    "startDate": "2019-10-15 08:00:00+00:00",
-                    "endDate": "2020-02-20 08:59:59+00:00"
-                },
-                {
-                    "season": 12,
-                    "displayName": t('s2'),
-                    "startDate": "2020-02-20 09:00:00+00:00",
-                    "endDate": "2020-06-17 05:59:59+00:00"
-                },
-                {
-                    "season": 13,
-                    "displayName": t('s3'),
-                    "startDate": "2020-06-17 06:00:00+00:00",
-                    "endDate": "2020-08-27 05:59:59+00:00"
-                },
-                {
-                    "season": 14,
-                    "displayName": t('s4'),
-                    "startDate": "2020-08-27 06:00:00+00:00",
-                    "endDate": "2020-12-02 04:59:59+00:00"
-                },
-                {
-                    "season": 15,
-                    "displayName": t('s5'),
-                    "startDate": "2020-12-02 05:00:00+00:00",
-                    "endDate": "2021-03-16 03:59:59+00:00"
-                },
-                {
-                    "season": 16,
-                    "displayName": t('s6'),
-                    "startDate": "2021-03-16 04:00:00+00:00",
-                    "endDate": "2021-06-08 05:59:59+00:00"
-                },
-                {
-                    "season": 17,
-                    "displayName": t('s7'),
-                    "startDate": "2021-06-08 06:00:00+00:00",
-                    "endDate": "2021-09-13 05:59:59+00:00"
-                },
-                {
-                    "season": 18,
-                    "displayName": t('s8'),
-                    "startDate": "2021-09-13 06:00:00+00:00",
-                    "endDate": "2021-12-04 21:15:00+00:00"
-                }
-            ]
+            "seasonInChapter": 1,
+            "displayName": t("s11"),
+            "startDate": "2019-10-15 08:00:00+00:00",
+            "endDate": "2020-02-20 08:59:59+00:00",
+            "path": require('../../assets/seasons/c2s1.png')
         },
         {
+            "season": 12,
+            "chapter": 2,
+            "seasonInChapter": 2,
+            "displayName": t("s12"),
+            "startDate": "2020-02-20 09:00:00+00:00",
+            "endDate": "2020-06-17 05:59:59+00:00",
+            "path": require('../../assets/seasons/c2s2.png')
+        },
+        {
+            "season": 13,
+            "chapter": 2,
+            "seasonInChapter": 3,
+            "displayName": t("s13"),
+            "startDate": "2020-06-17 06:00:00+00:00",
+            "endDate": "2020-08-27 05:59:59+00:00",
+            "path": require('../../assets/seasons/c2s3.png')
+        },
+        {
+            "season": 14,
+            "chapter": 2,
+            "seasonInChapter": 4,
+            "displayName": t("s14"),
+            "startDate": "2020-08-27 06:00:00+00:00",
+            "endDate": "2020-12-02 04:59:59+00:00",
+            "path": require('../../assets/seasons/c2s4.png')
+        },
+        {
+            "season": 15,
+            "chapter": 2,
+            "seasonInChapter": 5,
+            "displayName": t("s15"),
+            "startDate": "2020-12-02 05:00:00+00:00",
+            "endDate": "2021-03-16 03:59:59+00:00",
+            "path": require('../../assets/seasons/c2s5.png')
+        },
+        {
+            "season": 16,
+            "chapter": 2,
+            "seasonInChapter": 6,
+            "displayName": t("s16"),
+            "startDate": "2021-03-16 04:00:00+00:00",
+            "endDate": "2021-06-08 05:59:59+00:00",
+            "path": require('../../assets/seasons/c2s6.png')
+        },
+        {
+            "season": 17,
+            "chapter": 2,
+            "seasonInChapter": 7,
+            "displayName": t("s17"),
+            "startDate": "2021-06-08 06:00:00+00:00",
+            "endDate": "2021-09-13 05:59:59+00:00",
+            "path": require('../../assets/seasons/c2s7.png')
+        },
+        {
+            "season": 18,
+            "chapter": 2,
+            "seasonInChapter": 8,
+            "displayName": t("s18"),
+            "startDate": "2021-09-13 06:00:00+00:00",
+            "endDate": "2021-12-04 21:15:00+00:00",
+            "path": require('../../assets/seasons/c2s8.png')
+        },
+        {
+            "season": 19,
             "chapter": 3,
-            "name": t('c3'),
-            "path": require('../../assets/seasons/ch3.png'),
-            "seasons": [
-                {
-                    "season": 19,
-                    "displayName": t('s1'),
-                    "startDate": "2021-12-05 15:00:00+00:00",
-                    "endDate": "2022-03-20 06:59:59+00:00"
-                },
-                {
-                    "season": 20,
-                    "displayName": t('s2'),
-                    "startDate": "2022-03-20 07:00:00+00:00",
-                    "endDate": "2022-06-05 06:59:59+00:00"
-                },
-                {
-                    "season": 21,
-                    "displayName": t('s3'),
-                    "startDate": "2022-06-05 07:00:00+00:00",
-                    "endDate": "2022-09-18 05:59:59+00:00"
-                },
-                {
-                    "season": 22,
-                    "displayName": t('s4'),
-                    "startDate": "2022-09-18 06:00:00+00:00",
-                    "endDate": "2022-12-03 22:30:00+00:00"
-                }
-            ]
+            "seasonInChapter": 1,
+            "displayName": t("s19"),
+            "startDate": "2021-12-05 15:00:00+00:00",
+            "endDate": "2022-03-20 06:59:59+00:00",
+            "path": require('../../assets/seasons/c3s1.png')
         },
         {
+            "season": 20,
+            "chapter": 3,
+            "seasonInChapter": 2,
+            "displayName": t("s20"),
+            "startDate": "2022-03-20 07:00:00+00:00",
+            "endDate": "2022-06-05 06:59:59+00:00",
+            "path": require('../../assets/seasons/c3s2.png')
+        },
+        {
+            "season": 21,
+            "chapter": 3,
+            "seasonInChapter": 3,
+            "displayName": t("s21"),
+            "startDate": "2022-06-05 07:00:00+00:00",
+            "endDate": "2022-09-18 05:59:59+00:00",
+            "path": require('../../assets/seasons/c3s3.png')
+        },
+        {
+            "season": 22,
+            "chapter": 3,
+            "seasonInChapter": 4,
+            "displayName": t("s22"),
+            "startDate": "2022-09-18 06:00:00+00:00",
+            "endDate": "2022-12-03 22:30:00+00:00",
+            "path": require('../../assets/seasons/c3s4.png')
+        },
+        {
+            "season": 23,
             "chapter": 4,
-            "name": t('c4'),
-            "path": require('../../assets/seasons/ch4.png'),
-            "seasons": [
-                {
-                    "season": 23,
-                    "displayName": t('s1'),
-                    "startDate": "2022-12-04 08:00:00+00:00",
-                    "endDate": "2023-03-10 05:59:59+00:00"
-                },
-                {
-                    "season": 24,
-                    "displayName": t('s2'),
-                    "startDate": "2023-03-10 06:00:00+00:00",
-                    "endDate": "2023-06-09 05:59:59+00:00"
-                },
-                {
-                    "season": 25,
-                    "displayName": t('s4'),
-                    "startDate": "2023-06-09 06:00:00+00:00",
-                    "endDate": "2023-08-25 05:59:59+00:00"
-                },
-                {
-                    "season": 26,
-                    "displayName": t('s5'),
-                    "startDate": "2023-08-25 06:00:00+00:00",
-                    "endDate": "2023-11-03 05:59:59+00:00"
-                },
-                {
-                    "season": 27,
-                    "displayName": t('s_fortnite_og'),
-                    "startDate": "2023-11-03 06:00:00+00:00",
-                    "endDate": "2023-12-03 05:59:59+00:00"
-                }
-            ]
+            "seasonInChapter": 1,
+            "displayName": t("s24"),
+            "startDate": "2022-12-04 08:00:00+00:00",
+            "endDate": "2023-03-10 05:59:59+00:00",
+            "path": require('../../assets/seasons/c4s1.png')
         },
         {
+            "season": 24,
+            "chapter": 4,
+            "seasonInChapter": 2,
+            "displayName": t("s25"),
+            "startDate": "2023-03-10 06:00:00+00:00",
+            "endDate": "2023-06-09 05:59:59+00:00",
+            "path": require('../../assets/seasons/c4s2.png')
+        },
+        {
+            "season": 25,
+            "chapter": 4,
+            "seasonInChapter": 3,
+            "displayName": t("s25"),
+            "startDate": "2023-06-09 06:00:00+00:00",
+            "endDate": "2023-08-25 05:59:59+00:00",
+            "path": require('../../assets/seasons/c4s3.png')
+        },
+        {
+            "season": 26,
+            "chapter": 4,
+            "seasonInChapter": 4,
+            "displayName": t("s26"),
+            "startDate": "2023-08-25 06:00:00+00:00",
+            "endDate": "2023-11-03 05:59:59+00:00",
+            "path": require('../../assets/seasons/c4s4.png')
+        },
+        {
+            "season": 27,
+            "chapter": 4,
+            "seasonInChapter": 5,
+            "displayName": t("s27"),
+            "startDate": "2023-11-03 06:00:00+00:00",
+            "endDate": "2023-12-03 05:59:59+00:00",
+            "path": require('../../assets/seasons/c4s5.png')
+        },
+        {
+            "season": 28,
             "chapter": 5,
-            "name": t('c5'),
-            "path": require('../../assets/seasons/ch5.png'),
-            "seasons": [
-                {
-                    "season": 28,
-                    "displayName": t('s1'),
-                    "startDate": "2023-12-03 06:00:00+00:00",
-                    "endDate": "2024-03-08 05:59:59+00:00"
-                },
-                {
-                    "season": 29,
-                    "displayName": t('s2'),
-                    "startDate": "2024-03-08 06:00:00+00:00",
-                    "endDate": "2024-05-24 05:59:59+00:00"
-                }
-            ]
-        }
+            "seasonInChapter": 1,
+            "displayName": t("s28"),
+            "startDate": "2023-12-03 06:00:00+00:00",
+            "endDate": "2024-03-08 05:59:59+00:00",
+            "path": require('../../assets/seasons/c5s1.png')
+        },
+        {
+            "season": 29,
+            "chapter": 5,
+            "seasonInChapter": 2,
+            "displayName": t("s29"),
+            "startDate": "2024-03-08 06:00:00+00:00",
+            "endDate": "2024-05-24 05:59:59+00:00",
+            "path": require('../../assets/seasons/c5s2.png')
+        },
     ]
 
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}list_cached_data.json`;
@@ -472,7 +523,7 @@ export default function Home({ navigation }) {
     const [searchedCosmetics, setSearchedCosmetics] = useState([])
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [sortType, setSortType] = useState(null)
+    const [sortType, setSortType] = useState("of")
     const [filterQuery, setFilterQuery] = useState({
         rarity: [],
         source: [],
@@ -503,12 +554,9 @@ export default function Home({ navigation }) {
         if (filterQuery.rarity.length > 0) {
             filteredCosmetics = filteredCosmetics.filter(item => {
                 return filterQuery.rarity.some(rarity => {
-                    if (rarity.rarityType === "rarity") {
-                        return item.rarity.id.toLowerCase().includes(rarity.rarityId.toLowerCase()) && item.series === null;
-                    } else if (rarity.rarityType === "series") {
-                        return item.series !== null && item.series.id.toLowerCase().includes(rarity.rarityId.toLowerCase());
-                    }
-                    return false;
+                    if (item.series === null) {
+                        return item.rarity.id.toLowerCase().includes(rarity.toLowerCase());
+                    } else return item.series.id.toLowerCase().includes(rarity.toLowerCase());
                 });
             });
         }
@@ -522,7 +570,6 @@ export default function Home({ navigation }) {
                     else return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase()))
                 })
             });
-            console.log(filteredCosmetics.length)
         }
 
         if (filterQuery.tags.length > 0) {
@@ -538,7 +585,7 @@ export default function Home({ navigation }) {
             filteredCosmetics = filteredCosmetics.filter(item => item.introduction !== null)
             filteredCosmetics = filteredCosmetics.filter(item => {
                 return filterQuery.chapters.some(chapter => {
-                    return chapter.chapter === item.introduction.chapter && chapter.season === item.introduction.season
+                    return item.introduction.text.includes(chapter)
                 });
             });
         }
@@ -557,11 +604,11 @@ export default function Home({ navigation }) {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [i18next.language]);
 
     const fetchData = useCallback(async () => {
         try {
-            setLoading(true); // Set loading to true while fetching data
+            setLoading(true);
             let cachedData = null;
             await FileSystem.getInfoAsync(CACHE_FILE_URI)
                 .then(async i => {
@@ -569,6 +616,7 @@ export default function Home({ navigation }) {
                         const currentTime = new Date().getTime();
                         const modificationTimeMilliseconds = i.modificationTime * 1000
                         // Check if cached data is expired
+                        
                         if (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME) {
 
                             // If not expired, read cached data
@@ -576,7 +624,7 @@ export default function Home({ navigation }) {
                         }
                     }
 
-                    if (!cachedData) {
+                    if (!cachedData || i18next.language !== cachedLanguage) {
 
                         // Fetch data from API if no cached data or expired
                         const response = await axios(`https://fortniteapi.io/v2/items/list?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
@@ -589,6 +637,7 @@ export default function Home({ navigation }) {
                         // Save fetched data to cache
                         await FileSystem.writeAsStringAsync(CACHE_FILE_URI, JSON.stringify(jsonData.items), { encoding: FileSystem.EncodingType.UTF8 })
                         cachedData = JSON.stringify(jsonData.items);
+                        cachedLanguage = i18next.language
                     }
 
                     const removeUnWantedItems = JSON.parse(cachedData).filter(item => item.name !== "")
@@ -673,50 +722,18 @@ export default function Home({ navigation }) {
     const toggleFilter = useCallback((filterType, filterId) => {
         setFilterQuery(prevState => {
 
-            if (filterType === "chapters") {
-                const prevFilters = prevState[filterType];
-                const filterIndex = prevFilters.findIndex(index => index.chapter === filterId.chapter && index.season === filterId.season);
-                if (filterIndex !== -1) {
-                    return {
-                        ...prevState,
-                        [filterType]: prevFilters.filter(id => id.chapter !== filterId.chapter || id.season !== filterId.season)
-                    };
-                } else {
-                    return {
-                        ...prevState,
-                        [filterType]: [...prevFilters, filterId]
-                    };
-                }
-
-            } else if (filterType === "rarity") {
-                const prevFilters = prevState[filterType];
-                const filterIndex = prevFilters.findIndex(index => index.rarityId === filterId.rarityId);
-                if (filterIndex !== -1) {
-                    return {
-                        ...prevState,
-                        [filterType]: prevFilters.filter(id => id.rarityId !== filterId.rarityId)
-                    };
-                } else {
-                    return {
-                        ...prevState,
-                        [filterType]: [...prevFilters, filterId]
-                    };
-                }
-
+            const prevFilters = prevState[filterType];
+            const filterIndex = prevFilters.indexOf(filterId);
+            if (filterIndex !== -1) {
+                return {
+                    ...prevState,
+                    [filterType]: prevFilters.filter(id => id !== filterId)
+                };
             } else {
-                const prevFilters = prevState[filterType];
-                const filterIndex = prevFilters.indexOf(filterId);
-                if (filterIndex !== -1) {
-                    return {
-                        ...prevState,
-                        [filterType]: prevFilters.filter(id => id !== filterId)
-                    };
-                } else {
-                    return {
-                        ...prevState,
-                        [filterType]: [...prevFilters, filterId]
-                    };
-                }
+                return {
+                    ...prevState,
+                    [filterType]: [...prevFilters, filterId]
+                };
             }
         })
     }, []);
@@ -786,10 +803,7 @@ export default function Home({ navigation }) {
     }
 
     const handleRarityButtonClick = useCallback((rarity) => {
-        toggleFilter('rarity', {
-            rarityId: rarity.id,
-            rarityType: rarity.type
-        });
+        toggleFilter('rarity', rarity);
     }, [toggleFilter]);
 
     const handleSourceButtonClick = useCallback((sourceId) => {
@@ -803,15 +817,6 @@ export default function Home({ navigation }) {
     const handleChaptersButtonClick = useCallback((chapter) => {
         toggleFilter('chapters', chapter);
     }, [toggleFilter]);
-
-    const [fontsLoaded] = useFonts({
-        "BurbankSmall-Black": require('../../assets/fonts/BurbankSmall-Black.otf'),
-        "BurbankSmall-Black-AR": require('../../assets/fonts/Arabic.ttf'),
-    });
-
-    if (!fontsLoaded) {
-        return null
-    }
 
     function getImagePath(type) {
         const typeLower = type.toLowerCase();
@@ -859,7 +864,6 @@ export default function Home({ navigation }) {
 
         i18next.changeLanguage(i18next.language === "ar" ? 'en' : 'ar')
         I18nManager.forceRTL(i18next.language === "ar" ? true : false)
-        i18next.language === "ar" ? RNRestart.restart() : null
     }
 
     return (
@@ -924,7 +928,7 @@ export default function Home({ navigation }) {
                             height: 40,
                             color: 'white',
                             paddingLeft: 10,
-                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                         }}
                     />
 
@@ -984,7 +988,7 @@ export default function Home({ navigation }) {
                                 <Image source={getImagePath(type.id)} style={{ width: 25, height: 25, tintColor: selected === index ? colors.app.secondray : 'white', marginRight: 5 }} />
                                 <Text style={{
                                     color: selected === index ? colors.app.secondray : 'white',
-                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                    fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                 }}>{type.name.toUpperCase()}</Text>
                             </TouchableOpacity>
                         ))}
@@ -993,7 +997,7 @@ export default function Home({ navigation }) {
 
                 <FlatList
                     showsVerticalScrollIndicator={false}
-                    data={searchedCosmetics}
+                    data={loading ? [] : searchedCosmetics}
                     renderItem={({ item }) => <RenderImage item={item} navigation={navigation} />}
                     keyExtractor={(item, index) => index.toString()}
                     numColumns={3}
@@ -1023,7 +1027,7 @@ export default function Home({ navigation }) {
                                 color: 'white',
                                 fontSize: 18,
                                 paddingHorizontal: 20,
-                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                             }}>{t("rarity").toUpperCase()}</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                                 <View style={{
@@ -1078,10 +1082,10 @@ export default function Home({ navigation }) {
                                                         justifyContent: 'center',
 
                                                     }}
-                                                    onPress={() => handleRarityButtonClick(item)} // Handle button click
+                                                    onPress={() => handleRarityButtonClick(item.id)} // Handle button click
                                                 >
                                                     <Image
-                                                        style={{ flex: 1, width: 'auto', height: 60, borderWidth: 2, contentFit: 'cover', paddingHorizontal: 25, borderRadius: 10, borderColor: filterQuery.rarity.find(rarity => rarity.rarityId === item.id) ? colors.cosmetics[item.id].colors.Color2 : colors.cosmetics[item.id].colors.Color1 }} // Added style for the image
+                                                        style={{ flex: 1, width: 'auto', height: 60, borderWidth: 2, contentFit: 'cover', paddingHorizontal: 25, borderRadius: 10, borderColor: filterQuery.rarity.includes(item.id) ? colors.cosmetics[item.id].colors.Color2 : colors.cosmetics[item.id].colors.Color1 }} // Added style for the image
                                                         source={getRarityPath(item.id)}
                                                     />
 
@@ -1097,13 +1101,13 @@ export default function Home({ navigation }) {
 
                         <View style={{
                             flex: 1,
-                            marginTop: i18next.language === "ar" ? null : 10,
+                            marginTop: 10,
                         }}>
                             <Text style={{
                                 color: 'white',
                                 fontSize: 18,
                                 paddingHorizontal: 20,
-                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                             }}>{t("source").toUpperCase()}</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                                 <View style={{
@@ -1149,7 +1153,7 @@ export default function Home({ navigation }) {
                                                                         textAlign: 'center',
                                                                         fontSize: 25,
                                                                         color: "white",
-                                                                        fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                                        fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                                                     }}
                                                                 >
                                                                     {item.emoji}
@@ -1164,7 +1168,7 @@ export default function Home({ navigation }) {
                                                             marginRight: 20,
                                                             fontSize: 17,
                                                             color: "white",
-                                                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                                         }}
                                                     >
                                                         {item.name.toUpperCase()}
@@ -1181,13 +1185,13 @@ export default function Home({ navigation }) {
 
                         <View style={{
                             flex: 1,
-                            marginTop: i18next.language === "ar" ? null : 10,
+                            marginTop: 10,
                         }}>
                             <Text style={{
                                 color: 'white',
                                 fontSize: 18,
                                 paddingHorizontal: 20,
-                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                             }}>{t("tag").toUpperCase()}</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                                 <View style={{
@@ -1233,7 +1237,7 @@ export default function Home({ navigation }) {
                                                             marginRight: 20,
                                                             fontSize: 17,
                                                             color: "white",
-                                                            fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                                         }}
                                                     >
                                                         {item.name.toUpperCase()}
@@ -1250,13 +1254,13 @@ export default function Home({ navigation }) {
 
                         <View style={{
                             flex: 1,
-                            marginTop: i18next.language === "ar" ? null : 10,
+                            marginTop: 10,
                         }}>
                             <Text style={{
                                 color: 'white',
                                 fontSize: 18,
                                 paddingHorizontal: 20,
-                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                             }}>{t("season").toUpperCase()}</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                                 <View style={{
@@ -1267,49 +1271,44 @@ export default function Home({ navigation }) {
                                     width: '100%',
                                 }}>
                                     {
-                                        cosmeticChapters.map((chapter, index) => {
-                                            return chapter.seasons.map((season, i) => (
-                                                <View key={`${index}-${i}`}>
-                                                    <RNGHTouchableOpacity
+                                        cosmeticChapters.map((chapter, index) => (
+                                            <View key={index}>
+                                                <RNGHTouchableOpacity
+                                                    style={{
+                                                        marginRight: 5,
+                                                        height: 60,
+                                                        borderRadius: 10,
+                                                        padding: 5,
+                                                        backgroundColor: "#222128",
+                                                        alignItems: 'center',
+                                                        flexDirection: 'row',
+                                                        justifyContent: 'center',
+                                                        borderWidth: filterQuery.chapters.find(cs => cs === chapter.displayName) ? 2 : null,
+                                                        borderColor: filterQuery.chapters.find(cs => cs === chapter.displayName) ? colors.app.buttons : null,
+                                                    }}
+                                                    onPress={() => handleChaptersButtonClick(chapter.displayName)}
+                                                >
+                                                    <Image
                                                         style={{
-                                                            marginRight: 5,
-                                                            height: 60,
-                                                            borderRadius: 10,
-                                                            padding: 5,
-                                                            backgroundColor: "#222128",
-                                                            alignItems: 'center',
-                                                            flexDirection: 'row',
-                                                            justifyContent: 'center',
-                                                            borderWidth: filterQuery.chapters.find(cs => cs.chapter === chapter.name && cs.season === season.displayName) ? 2 : null,
-                                                            borderColor: filterQuery.chapters.find(cs => cs.chapter === chapter.name && cs.season === season.displayName) ? colors.app.buttons : null
+                                                            width: 50, height: 50, borderRadius: 10, marginRight: 5
                                                         }}
-                                                        onPress={() => handleChaptersButtonClick({
-                                                            chapter: chapter.name,
-                                                            season: season.displayName
-                                                        })}
+                                                        source={chapter.path}
+                                                        contentFit='contain'
+                                                    />
+                                                    <Text
+                                                        style={{
+                                                            textAlign: 'center',
+                                                            marginRight: 20,
+                                                            fontSize: 17,
+                                                            color: "white",
+                                                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
+                                                        }}
                                                     >
-                                                        <Image
-                                                            style={{
-                                                                width: 50, height: 50, borderRadius: 10, marginRight: 5
-                                                            }}
-                                                            source={chapter.path}
-                                                            contentFit='contain'
-                                                        />
-                                                        <Text
-                                                            style={{
-                                                                textAlign: 'center',
-                                                                marginRight: 20,
-                                                                fontSize: 17,
-                                                                color: "white",
-                                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
-                                                            }}
-                                                        >
-                                                            {chapter.name.toUpperCase()} {season.displayName.toUpperCase()}
-                                                        </Text>
-                                                    </RNGHTouchableOpacity>
-                                                </View>
-                                            ))
-                                        })
+                                                        {chapter.displayName.toUpperCase()}
+                                                    </Text>
+                                                </RNGHTouchableOpacity>
+                                            </View>
+                                        ))
 
                                     }
                                 </View>
@@ -1317,7 +1316,7 @@ export default function Home({ navigation }) {
                         </View>
 
                         <View style={{
-                            marginTop: i18next.language === "ar" ? null : 10,
+                            marginTop: 10,
                             paddingHorizontal: 20,
                         }}>
                             <View style={{
@@ -1327,7 +1326,7 @@ export default function Home({ navigation }) {
                                     color: 'white',
                                     fontSize: 18,
                                     marginBottom: i18next.language === "ar" ? null : 10,
-                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                    fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                 }}>{t("sort").toUpperCase()}</Text>
 
                                 <View>
@@ -1352,7 +1351,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("newest_first").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
@@ -1372,7 +1371,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("oldest_first").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
                                     </View>
@@ -1397,7 +1396,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("shop_recent").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
@@ -1417,7 +1416,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("shop_longest").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
                                     </View>
@@ -1442,7 +1441,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("atoz").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
@@ -1462,7 +1461,7 @@ export default function Home({ navigation }) {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                                fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                             }}>{t("ztoa").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
                                     </View>
@@ -1480,7 +1479,7 @@ export default function Home({ navigation }) {
                                     fontSize: 20,
                                     textAlign: 'center',
                                     color: 'white',
-                                    fontFamily: i18next.language === "ar" ? "BurbankSmall-Black-AR" : "BurbankSmall-Black",
+                                    fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
                                 }}>{t("reset_filters").toUpperCase()}</Text>
                             </RNGHTouchableOpacity>
                         </View>

@@ -111,9 +111,9 @@ export default function Details({ navigation }) {
         alert('Image downloaded successfully!');
     };
 
-    const [fontsLoaded] = useFonts({
-        "Burbank": require('../../assets/fonts/BurbankBigCondensed-Black.ttf'),
-    });
+    // const [fontsLoaded] = useFonts({
+    //     "BurbankBigCondensed-Black": require('../../assets/fonts/BurbankBigCondensed-Black.ttf'),
+    // });
 
     useEffect(() => {
         let audioPlayer
@@ -185,9 +185,9 @@ export default function Details({ navigation }) {
         return timeString;
     }
 
-    if (!fontsLoaded) {
-        return null
-    }
+    // if (!fontsLoaded) {
+    //     return null
+    // }
 
     const handleBookmarkToggle = () => {
         setPlayerData(prevState => ({
@@ -465,7 +465,7 @@ export default function Details({ navigation }) {
                             }} />
                             <Text style={{
                                 color: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color3,
-                                fontFamily: "Burbank",
+                                fontFamily: "BurbankBigCondensed-Black",
                                 marginRight: 5,
                                 textAlign: 'center',
                                 justifyContent: 'center'
@@ -485,7 +485,7 @@ export default function Details({ navigation }) {
                                 color: "white",
                                 marginLeft: 5,
                                 fontSize: 30,
-                                fontFamily: "Burbank"
+                                fontFamily: "BurbankBigCondensed-Black"
                             }}>{receivedData.name.toUpperCase()}</Text>
 
                             <RNGHTouchableOpacity onPress={handleBookmarkToggle} style={{
@@ -522,7 +522,7 @@ export default function Details({ navigation }) {
                                     <Text style={{
                                         color: "white",
                                         fontSize: 25,
-                                        fontFamily: "Burbank"
+                                        fontFamily: "BurbankBigCondensed-Black"
                                     }}>{receivedData.battlepass.displayText.chapterSeason.toUpperCase()}</Text>
                                 </View>
                             ) : (
@@ -539,7 +539,7 @@ export default function Details({ navigation }) {
                                     <Text style={{
                                         color: "white",
                                         fontSize: 25,
-                                        fontFamily: "Burbank"
+                                        fontFamily: "BurbankBigCondensed-Black"
                                     }}>{receivedData.shopHistory ? receivedData.price === 0 ? "FREE" : receivedData.price : "UNRELEASED"}</Text>
                                 </View>
                             )
@@ -555,7 +555,7 @@ export default function Details({ navigation }) {
                             {getUniqueChannelNames(receivedData.styles).map((channelName, index) => (
                                 <React.Fragment key={index}>
                                     <Text style={{
-                                        fontFamily: "Burbank",
+                                        fontFamily: "BurbankBigCondensed-Black",
                                         color: "white",
                                         paddingLeft: 20,
                                         fontSize: 20,
@@ -617,7 +617,7 @@ export default function Details({ navigation }) {
                         <Text style={{
                             color: 'white',
                             fontSize: 25,
-                            fontFamily: "Burbank"
+                            fontFamily: "BurbankBigCondensed-Black"
                         }}>REMIND ME</Text>
                     </RNGHTouchableOpacity>
 
@@ -631,7 +631,7 @@ export default function Details({ navigation }) {
                     <View>
                         <Text style={{
                             color: 'white',
-                            fontFamily: 'Burbank',
+                            fontFamily: 'BurbankBigCondensed-Black',
                             marginTop: 10,
                             fontSize: 20,
                         }}>RATE {receivedData.name.toUpperCase()} {receivedData.type.name.toUpperCase()}</Text>
@@ -640,35 +640,35 @@ export default function Details({ navigation }) {
                             <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '20%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>😱</Text>
                             </View>
-                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>20%</Text>
+                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "BurbankBigCondensed-Black", color: "white" }}>20%</Text>
                         </RNGHTouchableOpacity>
 
                         <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
                             <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '44%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>❤️</Text>
                             </View>
-                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>44%</Text>
+                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "BurbankBigCondensed-Black", color: "white" }}>44%</Text>
                         </RNGHTouchableOpacity>
 
                         <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
                             <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '51%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🙂</Text>
                             </View>
-                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>51%</Text>
+                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "BurbankBigCondensed-Black", color: "white" }}>51%</Text>
                         </RNGHTouchableOpacity>
 
                         <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
                             <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '33%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>🤢</Text>
                             </View>
-                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>33%</Text>
+                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "BurbankBigCondensed-Black", color: "white" }}>33%</Text>
                         </RNGHTouchableOpacity>
 
                         <RNGHTouchableOpacity style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2 }, styles.TouchableOpacityContainer]}>
                             <View style={[{ backgroundColor: colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1, width: '12%' }, styles.TouchableOpacityStyle]}>
                                 <Text style={{ fontSize: 25, position: 'absolute', left: 5 }}>💩</Text>
                             </View>
-                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "Burbank", color: "white" }}>12%</Text>
+                            <Text style={{ fontSize: 25, position: 'absolute', right: 5, fontFamily: "BurbankBigCondensed-Black", color: "white" }}>12%</Text>
                         </RNGHTouchableOpacity>
                         <Text style={{
                             color: 'white',
@@ -682,7 +682,7 @@ export default function Details({ navigation }) {
                             <View>
                                 <Text style={{
                                     color: 'white',
-                                    fontFamily: 'Burbank',
+                                    fontFamily: 'BurbankBigCondensed-Black',
                                     marginTop: 10,
                                     fontSize: 20,
                                     textAlign: 'left',
@@ -767,6 +767,6 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 25,
         color: 'white',
-        fontFamily: 'Burbank',
+        fontFamily: 'BurbankBigCondensed-Black',
     },
 });
