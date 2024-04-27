@@ -9,6 +9,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import CosmeticsScreenUI from './src/main/cosmetics'
 import DetailsScreenUI from './src/main/details'
 import ItemshopScreenUI from './src/main/itemshop'
+import QuestsBundleScreenUI from './src/main/quests_bundles'
+import QuestsScreenUI from './src/main/quests'
 import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated'
 import { PortalProvider } from '@gorhom/portal'
@@ -79,8 +81,8 @@ function HomeScreen() {
         />
 
         <Tab.Screen
-          name="MarketS"
-          component={ItemshopScreenUI}
+          name="Quests"
+          component={QuestsScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (
@@ -174,6 +176,7 @@ function HomeScreen() {
 
 export default function App() {
   const HomeScreenStack = createStackNavigator()
+  const Stack = createStackNavigator();
   NavigationBar.setVisibilityAsync("hidden");
   NavigationBar.setBackgroundColorAsync("black");
   NavigationBar.useVisibility(null)
@@ -204,13 +207,13 @@ export default function App() {
     loadLanguage()
   }, [])
 
-  // const [fontLoaded] = useFonts({
-  //   "BurbankBigCondensed-Black": require('./assets/fonts/BurbankBigCondensed-Black.ttf'),
-  //   "BurbankSmall-Black": require('./assets/fonts/BurbankSmall-Black.otf'),
-  //   "Lalezar-Regular": require('./assets/fonts/Lalezar-Regular.ttf'),
-  // });
+  const [fontLoaded] = useFonts({
+    "BurbankBigCondensed-Black": require('./assets/fonts/BurbankBigCondensed-Black.ttf'),
+    "BurbankSmall-Black": require('./assets/fonts/BurbankSmall-Black.otf'),
+    "Lalezar-Regular": require('./assets/fonts/Lalezar-Regular.ttf'),
+  });
 
-  // if(!fontLoaded) return null
+  if (!fontLoaded) return null
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -231,6 +234,11 @@ export default function App() {
             <HomeScreenStack.Screen
               name="DetailsScreen"
               component={DetailsScreenUI}
+            />
+
+            <HomeScreenStack.Screen
+              name="QuestsBundleScreen"
+              component={QuestsBundleScreenUI}
             />
 
           </HomeScreenStack.Navigator>

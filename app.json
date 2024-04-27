@@ -31,7 +31,7 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/BurbankSmall-Black.otf", "./assets/fonts/Arabic.ttf", "./assets/fonts/BurbankBigCondensed-Black.ttf"]
+          "fonts": ["./assets/fonts/BurbankSmall-Black.otf", "./assets/fonts/Lalezar-Regular.ttf", "./assets/fonts/BurbankBigCondensed-Black.ttf"]
         }
       ]
     ],
