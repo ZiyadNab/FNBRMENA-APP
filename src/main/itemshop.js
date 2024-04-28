@@ -4,18 +4,39 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native
 import { Octicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import colors from '../../colors.json'
+import loadShop from '../helpers/loadShop';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as FileSystem from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 import i18next from '../../localization/i18n.js'
 import axios from 'axios'
-import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-native-gesture-handler';
-import Carousel from 'react-native-reanimated-carousel';
-import AutoScrollingScrollView from '../helpers/imageSlider'
+import { ScrollView } from 'react-native-gesture-handler';
 
-export default function Quests({ navigation }) {
+export default function Shop({ navigation }) {
     const { t } = useTranslation()
     let cachedLanguage = i18next.language;
+
+    const types = [
+        {
+            name: "ALl"
+        },
+        {
+            id: "BattleRoyale",
+            name: "Battle Royale"
+        },
+        {
+            id: "Juno",
+            name: "LEGO® Fortnite"
+        },
+        {
+            id: "sparks_song",
+            name: "Festival"
+        },
+        {
+            id: "DelMar",
+            name: "Rocket Racing"
+        },
+    ]
 
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}shop_cached_data.json`;
     const CACHE_EXPIRATION_TIME = 15 * 60 * 1000;
@@ -23,7 +44,154 @@ export default function Quests({ navigation }) {
     const [loading, setLoading] = useState(true)
     const [shop, setShop] = useState([])
     const [refreshing, setRefreshing] = useState(false)
-    const [section, setSections] = useState([])
+    const [selected, setSelected] = useState(0);
+    const [searchedShop, setSearchedShop] = useState([])
+
+    // const filterShop = useCallback(() => {
+
+    //     let filteredShop = shop;
+    //     if(selected === 1){
+    //         filteredShop = filteredShop.filter(section => {
+    //             // Check if the section has tiles
+    //             if (section.tiles) {
+    //                 // Filter through each tile
+    //                 section.tiles = section.tiles.filter(tile => {
+    //                     // Check if the tile has a list
+    //                     if (tile.list > 0) {
+    //                         // Filter through each item in the list
+    //                         tile.list = tile.list.filter(item => {
+    //                             // Check if the mainType is sparks_song
+    //                             if (item.mainType === "sparks_song") {
+    //                                 return false; // Remove item
+    //                             } else {
+    //                                 // Check if displayAssets has BattleRoyale as primaryMode
+    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "BattleRoyale");
+    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
+    //                             }
+    //                         });
+                            
+    //                         // Remove the tile if its list is empty
+    //                         return tile.list.length > 0;
+    //                     } else {
+    //                         return false; // Remove tile if it has no list
+    //                     }
+    //                 });
+                    
+    //                 // Remove the section if its tiles are empty
+    //                 console.log(section.tiles.length > 0)
+    //                 return section.tiles.length > 0;
+    //             } else {
+    //                 return false; // Remove section if it has no tiles
+    //             }
+    //         });
+    //     }
+    //     else if(selected === 2){
+    //         filteredShop = filteredShop.filter(section => {
+    //             // Check if the section has tiles
+    //             if (section.tiles) {
+    //                 // Filter through each tile
+    //                 section.tiles = section.tiles.filter(tile => {
+    //                     // Check if the tile has a list
+    //                     if (tile.list) {
+    //                         // Filter through each item in the list
+    //                         tile.list = tile.list.filter(item => {
+    //                             // Check if the mainType is sparks_song
+    //                             if (item.mainType === "sparks_song") {
+    //                                 return false; // Remove item
+    //                             } else {
+    //                                 // Check if displayAssets has BattleRoyale as primaryMode
+    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "Juno");
+    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
+    //                             }
+    //                         });
+                            
+    //                         // Remove the tile if its list is empty
+    //                         return tile.list.length > 0;
+    //                     } else {
+    //                         return false; // Remove tile if it has no list
+    //                     }
+    //                 });
+                    
+    //                 // Remove the section if its tiles are empty
+    //                 return section.tiles.length > 0;
+    //             } else {
+    //                 return false; // Remove section if it has no tiles
+    //             }
+    //         });
+    //     }
+    //     else if(selected === 4){
+    //         filteredShop = filteredShop.filter(section => {
+    //             // Check if the section has tiles
+    //             if (section.tiles) {
+    //                 // Filter through each tile
+    //                 section.tiles = section.tiles.filter(tile => {
+    //                     // Check if the tile has a list
+    //                     if (tile.list) {
+    //                         // Filter through each item in the list
+    //                         tile.list = tile.list.filter(item => {
+    //                             // Check if the mainType is sparks_song
+    //                             if (item.mainType !== "sparks_song") {
+    //                                 return false; // Remove item
+    //                             }
+    //                         });
+                            
+    //                         // Remove the tile if its list is empty
+    //                         return tile.list.length > 0;
+    //                     } else {
+    //                         return false; // Remove tile if it has no list
+    //                     }
+    //                 });
+                    
+    //                 // Remove the section if its tiles are empty
+    //                 return section.tiles.length > 0;
+    //             } else {
+    //                 return false; // Remove section if it has no tiles
+    //             }
+    //         });
+    //     }
+    //     else if(selected === 4){
+    //         filteredShop = filteredShop.filter(section => {
+    //             // Check if the section has tiles
+    //             if (section.tiles) {
+    //                 // Filter through each tile
+    //                 section.tiles = section.tiles.filter(tile => {
+    //                     // Check if the tile has a list
+    //                     if (tile.list) {
+    //                         // Filter through each item in the list
+    //                         tile.list = tile.list.filter(item => {
+    //                             // Check if the mainType is sparks_song
+    //                             if (item.mainType === "sparks_song") {
+    //                                 return false; // Remove item
+    //                             } else {
+    //                                 // Check if displayAssets has BattleRoyale as primaryMode
+    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "DelMar");
+    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
+    //                             }
+    //                         });
+                            
+    //                         // Remove the tile if its list is empty
+    //                         return tile.list.length > 0;
+    //                     } else {
+    //                         return false; // Remove tile if it has no list
+    //                     }
+    //                 });
+                    
+    //                 // Remove the section if its tiles are empty
+    //                 return section.tiles.length > 0;
+    //             } else {
+    //                 return false; // Remove section if it has no tiles
+    //             }
+    //         });
+    //     }
+    //     else filteredShop = shop
+
+    //     setSearchedShop(filteredShop);
+
+    // }, [shop, selected]);
+
+    // useEffect(() => {
+    //     filterShop();
+    // }, [filterShop]);
 
     const fetchData = useCallback(async () => {
         try {
@@ -43,7 +211,7 @@ export default function Quests({ navigation }) {
                         }
                     }
 
-                    if (!cachedData || i18next.language !== cachedLanguage) {
+                    if (!cachedData || i18next.language !== cachedLanguage || true) {
 
                         // Fetch data from API if no cached data or expired
                         const response = await axios(`https://fortniteapi.io/v2/shop?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
@@ -73,15 +241,15 @@ export default function Quests({ navigation }) {
                                     category: item.section.category,
                                     landingPriority: item.section.landingPriority,
                                     itemsCount: 0,
-                                    items: []
+                                    tiles: []
                                 });
                             }
 
                             // Check if tileSize object already exists
-                            const existingTileSizeObj = sectionsMap.get(sectionId).items.find(obj => obj.tileSize === item.tileSize);
+                            const existingTileSizeObj = sectionsMap.get(sectionId).tiles.find(obj => obj.tileSize === item.tileSize);
                             if (!existingTileSizeObj) {
                                 // Create a new tileSize object if not found
-                                sectionsMap.get(sectionId).items.push({
+                                sectionsMap.get(sectionId).tiles.push({
                                     tileSize: item.tileSize,
                                     list: [item]
                                 });
@@ -103,7 +271,6 @@ export default function Quests({ navigation }) {
                     const cachedDataParsed = JSON.parse(cachedData);
                     const sectionsWithItems = convertToSectionsWithItems(cachedDataParsed.shop);
 
-                    setSections(sectionsWithItems)
                     setShop(sectionsWithItems);
                     setLoading(false);
                     setRefreshing(false);
@@ -119,90 +286,6 @@ export default function Quests({ navigation }) {
     useEffect(() => {
         fetchData();
     }, [i18next.language]);
-
-    function loadShop({ item, index }) {
-
-        return (
-            <View key={index} style={{
-                marginBottom: 15,
-            }}>
-                <View style={{
-                    paddingHorizontal: 10,
-                    width: 'auto',
-                    flexDirection: "row",
-                    marginBottom: 5
-                }}>
-                    <Text style={{ color: "white", fontFamily: "BurbankBigCondensed-Black", fontSize: 20, marginRight: 10 }}>{item.name.toUpperCase()}</Text>
-                    <View style={{
-                        backgroundColor: "#009BFF",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingHorizontal: 7,
-                        borderRadius: 5
-                    }}>
-                        <Text style={{ color: "white", fontFamily: "BurbankBigCondensed-Black", fontSize: 15 }}>{item.itemsCount} ITEMS</Text>
-                    </View>
-                </View>
-                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 10 }}>
-                    {item.items.map((ratio, index) => (
-                        <View key={index} style={{ flexDirection: 'row' }}>
-                            {
-                                ratio.tileSize === "Size_1_x_1" ? (
-                                    <View style={{ flexDirection: 'row' }}>
-                                        {[...Array(Math.ceil(ratio.list.length / 2))].map((_, colIndex) => (
-                                            <View key={colIndex} style={{ flexDirection: 'column' }}>
-                                                {/* Map through the items in each column */}
-                                                {ratio.list.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
-                                                    <View key={`${colIndex}-${rowIndex}`} style={{
-                                                        borderRadius: 5,
-                                                        marginRight: 10,
-                                                        marginBottom: rowIndex === 0 ? 5 : 0, // Add margin bottom for the first item in each column
-                                                        width: 62,
-                                                        height: 62,
-                                                        overflow: 'hidden',
-                                                        backgroundColor: '#191919',
-                                                    }}>
-                                                        <AutoScrollingScrollView
-                                                            width={62}
-                                                            height={62}
-                                                            images={offer.displayAssets.map(e => e.background + "?width=500")}
-                                                        />
-
-                                                    </View>
-                                                ))}
-                                            </View>
-                                        ))}
-                                    </View>
-                                ) : (
-                                    <View style={{ flexDirection: "row" }}>
-                                        {ratio.list.map((offer, rowIndex) => (
-                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })}>
-                                                <View style={{
-                                                    borderRadius: 5,
-                                                    marginRight: 10,
-                                                    width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 130 : offer.tileSize === "Size_1_x_2" ? 62 : 150,
-                                                    height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 130 : offer.tileSize === "Size_2_x_2" ? 130 : offer.tileSize === "Size_1_x_2" ? 130 : 150,
-                                                    overflow: 'hidden',
-                                                    backgroundColor: '#191919',
-                                                }}>
-                                                    <AutoScrollingScrollView
-                                                        width={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 130 : offer.tileSize === "Size_1_x_2" ? 62 : 150}
-                                                        height={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 130 : offer.tileSize === "Size_2_x_2" ? 130 : offer.tileSize === "Size_1_x_2" ? 130 : 150}
-                                                        images={offer.displayAssets.map(e => e.background + "?width=500")}
-                                                    />
-                                                </View>
-                                            </RNGHTouchableOpacity>
-                                        ))}
-                                    </View>
-                                )
-
-                            }
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
-        )
-    }
 
     return (
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
@@ -245,7 +328,7 @@ export default function Quests({ navigation }) {
 
                 </View>
 
-                {/* <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                     <View style={{
                         flexDirection: 'row',
                         justifyContent: 'center',
@@ -253,9 +336,10 @@ export default function Quests({ navigation }) {
                         height: 40,
                         marginBottom: 20
                     }}>
-                        {section.map((section, index) => (
+                        {types.map((type, index) => (
 
                             <TouchableOpacity
+                                onPress={() => setSelected(index)}
                                 key={index}
                                 style={{
                                     marginRight: 5,
@@ -271,19 +355,25 @@ export default function Quests({ navigation }) {
                                 }}
                             >
                                 <Text style={{
-                                    color: 'white',
+                                    color: selected === index ? colors.app.secondray : 'white',
                                     fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
-                                }}>{section.name.toUpperCase()}</Text>
+                                }}>{type.name.toUpperCase()}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
-                </ScrollView> */}
+                </ScrollView>
 
             </View>
 
             <FlatList
+                onEndReachedThreshold={0.1}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={20}
+                updateCellsBatchingPeriod={5000}
+                initialNumToRender={50}
+                windowSize={15}
                 data={shop}
-                renderItem={loadShop}
+                renderItem={({ item, index }) => <loadShop item={item} index={index} navigation={navigation} />}
             />
         </LinearGradient>
 

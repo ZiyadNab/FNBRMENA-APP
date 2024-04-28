@@ -1,24 +1,92 @@
-<ScrollView horizontal={true}>
-                    {[...Array(Math.ceil(item.items.length / 2))].map((_, colIndex) => (
-                        <View key={colIndex} style={{ flexDirection: 'column' }}>
-                            {/* Map through the items in each column */}
-                            {item.items.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
-                                <View key={`${colIndex}-${rowIndex}`} style={{
-                                    borderRadius: 10,
-                                    marginRight: 20,
-                                    marginBottom: rowIndex === 0 ? 10 : 0, // Add margin bottom for the first item in each column
-                                    width: offer.tileSize === "Size_3_x_2" ? 340 : offer.tileSize === "Size_2_x_2" ? 300 : offer.tileSize === "Size_1_x_2" ? 200 : 200,
-                                    height: offer.tileSize === "Size_3_x_2" ? 340 : offer.tileSize === "Size_2_x_2" ? 350 : offer.tileSize === "Size_1_x_2" ? 340 : 200,
-                                    overflow: 'hidden',
-                                    backgroundColor: '#191919',
-                                }}>
-                                    {/* <AutoScrollingScrollView width={offer.tileSize === "Size_2_x_2" ? 300 : offer.tileSize === "Size_1_x_2" ? 150 : 200} height={offer.tileSize === "Size_2_x_2" ? 300 : offer.tileSize === "Size_1_x_2" ? 150 : 200} images={offer.displayAssets.map(e => {
-                                            return e.background
-                                        })}/> */}
-
-                                </View>
-                            ))}
-                        </View>
-                    ))}
-
-                </ScrollView>
+[
+    {
+        "section": {
+            "id": "JamTracks.98",
+            "name": "Jam Tracks",
+            "category": "Take Your Stage",
+            "landingPriority": 0,
+            "tile": [
+                {
+                    "tileSize": "Size_1_x_1",
+                    "list": [
+                        {
+                            "mainId": "SID_Placeholder_47",
+                            "displayName": "my ex's best friend",
+                            "displayType": "Item Bundle",
+                            "mainType": "sparks_song",
+                            "displayAssets": [
+                                {
+                                    "displayAsset": "virtual",
+                                    "primaryMode": "BattleRoyale"
+                                }
+                            ]
+                        },
+                        {
+                            "mainId": "SID_Placeholder_48",
+                            "displayName": "Moves Like Jagger",
+                            "displayType": "Item Bundle",
+                            "mainType": "sparks_song",
+                            "displayAssets": [
+                                {
+                                    "displayAsset": "virtual",
+                                    "primaryMode": "BattleRoyale"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "section": {
+            "id": "TwitchCon.99",
+            "name": "TwitchCon Champions Locker Bundle",
+            "category": "Spotlight",
+            "landingPriority": 0,
+            "tiles": [
+                {
+                    "tileSize": "Size_2_x_2",
+                    "list": [
+                        {
+                            "mainId": "Architect_Clown_Bundle",
+                            "displayName": "TwitchCon Champions Locker Bundle",
+                            "displayType": "6 Item Bundle",
+                            "mainType": "bundle",
+                            "displayAssets": [
+                                {
+                                    "primaryMode": "Juno"
+                                },
+                                {
+                                    "primaryMode": "BattleRoyale"
+                                },
+                                {
+                                    "primaryMode": "BattleRoyale"
+                                },
+                                {
+                                    "primaryMode": "Juno"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "tileSize": "Size_1_x_2",
+                    "list": [
+                        {
+                            "mainId": "Pickaxe_ID_551_KeplerFemale_AOYI5",
+                            "displayName": "P-5000 Power Loader Arm",
+                            "displayType": "Harvesting Tool",
+                            "mainType": "pickaxe",
+                            "displayAssets": [
+                                {
+                                    "primaryMode": "BattleRoyale"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+]
