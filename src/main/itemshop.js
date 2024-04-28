@@ -1,16 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import colors from '../../colors.json'
-import loadShop from '../helpers/loadShop';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as FileSystem from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 import i18next from '../../localization/i18n.js'
 import axios from 'axios'
-import { ScrollView } from 'react-native-gesture-handler';
+import { TouchableOpacity as RNGHTouchableOpacity, ScrollView, FlatList } from 'react-native-gesture-handler';
+import AutoScrollingScrollView from '../helpers/imageSlider';
 
 export default function Shop({ navigation }) {
     const { t } = useTranslation()
@@ -18,23 +18,23 @@ export default function Shop({ navigation }) {
 
     const types = [
         {
-            name: "ALl"
+            name: t("all")
         },
         {
             id: "BattleRoyale",
-            name: "Battle Royale"
+            name: t("battle_royale")
         },
         {
             id: "Juno",
-            name: "LEGO® Fortnite"
+            name: t("juno")
         },
         {
             id: "sparks_song",
-            name: "Festival"
+            name: t("fetival")
         },
         {
             id: "DelMar",
-            name: "Rocket Racing"
+            name: t("delmar")
         },
     ]
 
@@ -69,14 +69,14 @@ export default function Shop({ navigation }) {
     //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
     //                             }
     //                         });
-                            
+
     //                         // Remove the tile if its list is empty
     //                         return tile.list.length > 0;
     //                     } else {
     //                         return false; // Remove tile if it has no list
     //                     }
     //                 });
-                    
+
     //                 // Remove the section if its tiles are empty
     //                 console.log(section.tiles.length > 0)
     //                 return section.tiles.length > 0;
@@ -104,14 +104,14 @@ export default function Shop({ navigation }) {
     //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
     //                             }
     //                         });
-                            
+
     //                         // Remove the tile if its list is empty
     //                         return tile.list.length > 0;
     //                     } else {
     //                         return false; // Remove tile if it has no list
     //                     }
     //                 });
-                    
+
     //                 // Remove the section if its tiles are empty
     //                 return section.tiles.length > 0;
     //             } else {
@@ -134,14 +134,14 @@ export default function Shop({ navigation }) {
     //                                 return false; // Remove item
     //                             }
     //                         });
-                            
+
     //                         // Remove the tile if its list is empty
     //                         return tile.list.length > 0;
     //                     } else {
     //                         return false; // Remove tile if it has no list
     //                     }
     //                 });
-                    
+
     //                 // Remove the section if its tiles are empty
     //                 return section.tiles.length > 0;
     //             } else {
@@ -168,14 +168,14 @@ export default function Shop({ navigation }) {
     //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
     //                             }
     //                         });
-                            
+
     //                         // Remove the tile if its list is empty
     //                         return tile.list.length > 0;
     //                     } else {
     //                         return false; // Remove tile if it has no list
     //                     }
     //                 });
-                    
+
     //                 // Remove the section if its tiles are empty
     //                 return section.tiles.length > 0;
     //             } else {
@@ -287,6 +287,133 @@ export default function Shop({ navigation }) {
         fetchData();
     }, [i18next.language]);
 
+    const loadShop = useCallback(({ item, index }) => {
+
+        return (
+            <View style={{ marginBottom: 15 }}>
+                <View style={{ paddingHorizontal: 20, flexDirection: "row", marginBottom: 5 }}>
+                    <Text style={{ color: "white", fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black", fontSize: 20, marginRight: 5 }}>{item.name.toUpperCase()}</Text>
+                    <View style={{ backgroundColor: "#009BFF", justifyContent: "center", alignItems: "center", paddingHorizontal: 5, borderRadius: 5 }}>
+                        <Text style={{ color: "white", fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black", fontSize: 15 }}>{item.itemsCount} {item.itemsCount > 1 ? t("items").toUpperCase() : t("item").toUpperCase()}</Text>
+                    </View>
+                </View>
+                <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingLeft: 20 }}
+                    data={item.tiles}
+                    onEndReachedThreshold={0.1}
+                    removeClippedSubviews={true}
+                    maxToRenderPerBatch={10}
+                    updateCellsBatchingPeriod={5000}
+                    initialNumToRender={25}
+                    windowSize={2}
+                    keyExtractor={(item, index) => `${index}`} // Change the key to something unique for each item
+                    renderItem={({ item: ratio }) => (
+                        <View style={{ flexDirection: ratio.tileSize === "Size_1_x_1" ? 'row' : 'column' }}>
+                            {ratio.tileSize === "Size_1_x_1" ? (
+                                [...Array(Math.ceil(ratio.list.length / 2))].map((_, colIndex) => (
+                                    <View key={colIndex} style={{ flexDirection: 'column' }}>
+                                        {ratio.list.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
+                                            <RNGHTouchableOpacity onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} key={`${colIndex}-${rowIndex}`} style={{ marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+
+                                                <AutoScrollingScrollView
+                                                    width={72}
+                                                    height={72}
+                                                    images={offer.displayAssets.map(e => e.background + "?width=100")}
+                                                />
+                                                <LinearGradient
+                                                    colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        height: 30, // Adjust the height of the shadow as needed
+                                                    }}
+                                                />
+                                                <Text style={{
+                                                    fontSize: 10,
+                                                    color: "white",
+                                                    position: "absolute",
+                                                    bottom: 13,
+                                                    left: 3,
+                                                    fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                }}>{offer.displayName.toUpperCase()}</Text>
+                                                <Image style={{
+                                                    position: "absolute",
+                                                    bottom: 3,
+                                                    left: 3,
+                                                    width: 11,
+                                                    height: 11
+                                                }} source={require("../../assets/cosmetics/others/vbucks.png")} />
+                                                <Text style={{
+                                                    fontSize: 9,
+                                                    color: "white",
+                                                    position: "absolute",
+                                                    bottom: 3,
+                                                    left: 14,
+                                                    fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                }}>{offer.price.finalPrice}</Text>
+                                            </RNGHTouchableOpacity>
+                                        ))}
+                                    </View>
+                                ))
+                            ) : (
+                                <View style={{ flexDirection: "row" }}>
+                                    {
+                                        ratio.list.map((offer, rowIndex) => (
+                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} style={{ marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+                                                <AutoScrollingScrollView
+                                                    width={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150}
+                                                    height={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150}
+                                                    images={offer.displayAssets.map(e => e.background + "?width=265")}
+                                                />
+                                                <LinearGradient
+                                                    colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: -2,
+                                                        left: 0,
+                                                        right: 0,
+                                                        height: 75, // Adjust the height of the shadow as needed
+                                                    }}
+                                                />
+                                                <Text style={{
+                                                    fontSize: 12,
+                                                    color: "white",
+                                                    position: "absolute",
+                                                    bottom: 15,
+                                                    left: 3,
+                                                    fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                }}>{offer.displayName.toUpperCase()}</Text>
+                                                <Image style={{
+                                                    position: "absolute",
+                                                    bottom: 3,
+                                                    left: 3,
+                                                    width: 12,
+                                                    height: 12
+                                                }} source={require("../../assets/cosmetics/others/vbucks.png")} />
+                                                <Text style={{
+                                                    fontSize: 12,
+                                                    color: "white",
+                                                    position: "absolute",
+                                                    bottom: 2,
+                                                    left: 15,
+                                                    fontFamily: "BurbankSmall-Black"
+                                                }}>{offer.price.finalPrice}</Text>
+                                            </RNGHTouchableOpacity>
+                                        ))
+                                    }
+                                </View>
+                            )}
+                        </View>
+                    )}
+                />
+            </View>
+        );
+    }, [])
+
     return (
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
             <View style={{
@@ -363,18 +490,20 @@ export default function Shop({ navigation }) {
                     </View>
                 </ScrollView>
 
+                <FlatList
+                    onEndReachedThreshold={0.1}
+                    removeClippedSubviews={true}
+                    maxToRenderPerBatch={20}
+                    updateCellsBatchingPeriod={5000}
+                    initialNumToRender={50}
+                    windowSize={15}
+                    data={shop}
+                    renderItem={loadShop}
+                />
+
             </View>
 
-            <FlatList
-                onEndReachedThreshold={0.1}
-                removeClippedSubviews={true}
-                maxToRenderPerBatch={20}
-                updateCellsBatchingPeriod={5000}
-                initialNumToRender={50}
-                windowSize={15}
-                data={shop}
-                renderItem={({ item, index }) => <loadShop item={item} index={index} navigation={navigation} />}
-            />
+
         </LinearGradient>
 
     );
