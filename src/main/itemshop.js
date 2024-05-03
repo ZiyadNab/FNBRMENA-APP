@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import colors from '../../colors.json'
@@ -43,155 +43,168 @@ export default function Shop({ navigation }) {
 
     const [loading, setLoading] = useState(true)
     const [shop, setShop] = useState([])
+    const [searchedShop, setSearchedShop] = useState([])
     const [refreshing, setRefreshing] = useState(false)
     const [selected, setSelected] = useState(0);
-    const [searchedShop, setSearchedShop] = useState([])
+    const [bookmarks, setBookmarks] = useState([
+        "AA_AcresFarm_Bundle",
+        "Character_Headset",
+        "Character_RollerBlade"
+    ])
 
-    // const filterShop = useCallback(() => {
+    const filterShop = useCallback(() => {
 
-    //     let filteredShop = shop;
-    //     if(selected === 1){
-    //         filteredShop = filteredShop.filter(section => {
-    //             // Check if the section has tiles
-    //             if (section.tiles) {
-    //                 // Filter through each tile
-    //                 section.tiles = section.tiles.filter(tile => {
-    //                     // Check if the tile has a list
-    //                     if (tile.list > 0) {
-    //                         // Filter through each item in the list
-    //                         tile.list = tile.list.filter(item => {
-    //                             // Check if the mainType is sparks_song
-    //                             if (item.mainType === "sparks_song") {
-    //                                 return false; // Remove item
-    //                             } else {
-    //                                 // Check if displayAssets has BattleRoyale as primaryMode
-    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "BattleRoyale");
-    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
-    //                             }
-    //                         });
+        let filteredShop = JSON.parse(JSON.stringify(shop));
 
-    //                         // Remove the tile if its list is empty
-    //                         return tile.list.length > 0;
-    //                     } else {
-    //                         return false; // Remove tile if it has no list
-    //                     }
-    //                 });
+        if (selected === 1) {
+            filteredShop = filteredShop.filter(section => {
+                // Check if the section has tiles
+                if (section.tiles) {
+                    // Filter through each tile
+                    section.tiles = section.tiles.filter(tile => {
+                        // Check if the tile has a list
+                        if (tile.list.length > 0) {
 
-    //                 // Remove the section if its tiles are empty
-    //                 console.log(section.tiles.length > 0)
-    //                 return section.tiles.length > 0;
-    //             } else {
-    //                 return false; // Remove section if it has no tiles
-    //             }
-    //         });
-    //     }
-    //     else if(selected === 2){
-    //         filteredShop = filteredShop.filter(section => {
-    //             // Check if the section has tiles
-    //             if (section.tiles) {
-    //                 // Filter through each tile
-    //                 section.tiles = section.tiles.filter(tile => {
-    //                     // Check if the tile has a list
-    //                     if (tile.list) {
-    //                         // Filter through each item in the list
-    //                         tile.list = tile.list.filter(item => {
-    //                             // Check if the mainType is sparks_song
-    //                             if (item.mainType === "sparks_song") {
-    //                                 return false; // Remove item
-    //                             } else {
-    //                                 // Check if displayAssets has BattleRoyale as primaryMode
-    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "Juno");
-    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
-    //                             }
-    //                         });
+                            // Filter through each item in the list
+                            tile.list = tile.list.filter(item => {
+                                // Check if the mainType is sparks_song
+                                if (item.mainType === "sparks_song") {
+                                    return false; // Remove item
+                                } else {
 
-    //                         // Remove the tile if its list is empty
-    //                         return tile.list.length > 0;
-    //                     } else {
-    //                         return false; // Remove tile if it has no list
-    //                     }
-    //                 });
+                                    // Check if displayAssets has BattleRoyale as primaryMode
+                                    item.displayAssets = item.displayAssets.filter(asset => asset.primaryMode === "BattleRoyale");
 
-    //                 // Remove the section if its tiles are empty
-    //                 return section.tiles.length > 0;
-    //             } else {
-    //                 return false; // Remove section if it has no tiles
-    //             }
-    //         });
-    //     }
-    //     else if(selected === 4){
-    //         filteredShop = filteredShop.filter(section => {
-    //             // Check if the section has tiles
-    //             if (section.tiles) {
-    //                 // Filter through each tile
-    //                 section.tiles = section.tiles.filter(tile => {
-    //                     // Check if the tile has a list
-    //                     if (tile.list) {
-    //                         // Filter through each item in the list
-    //                         tile.list = tile.list.filter(item => {
-    //                             // Check if the mainType is sparks_song
-    //                             if (item.mainType !== "sparks_song") {
-    //                                 return false; // Remove item
-    //                             }
-    //                         });
+                                    // Remove the item if displayAssets is empty after filtering
+                                    return item.displayAssets.length > 0;
+                                }
+                            });
 
-    //                         // Remove the tile if its list is empty
-    //                         return tile.list.length > 0;
-    //                     } else {
-    //                         return false; // Remove tile if it has no list
-    //                     }
-    //                 });
+                            // Remove the tile if its list is empty
+                            return tile.list.length > 0;
+                        } else {
+                            return false; // Remove tile if it has no list
+                        }
+                    });
 
-    //                 // Remove the section if its tiles are empty
-    //                 return section.tiles.length > 0;
-    //             } else {
-    //                 return false; // Remove section if it has no tiles
-    //             }
-    //         });
-    //     }
-    //     else if(selected === 4){
-    //         filteredShop = filteredShop.filter(section => {
-    //             // Check if the section has tiles
-    //             if (section.tiles) {
-    //                 // Filter through each tile
-    //                 section.tiles = section.tiles.filter(tile => {
-    //                     // Check if the tile has a list
-    //                     if (tile.list) {
-    //                         // Filter through each item in the list
-    //                         tile.list = tile.list.filter(item => {
-    //                             // Check if the mainType is sparks_song
-    //                             if (item.mainType === "sparks_song") {
-    //                                 return false; // Remove item
-    //                             } else {
-    //                                 // Check if displayAssets has BattleRoyale as primaryMode
-    //                                 const hasBattleRoyale = item.displayAssets.some(asset => asset.primaryMode === "DelMar");
-    //                                 return hasBattleRoyale; // Keep item if BattleRoyale exists
-    //                             }
-    //                         });
+                    // Remove the section if its tiles are empty
+                    return section.tiles.length > 0;
+                } else {
+                    return false; // Remove section if it has no tiles
+                }
+            });
+        }
+        else if (selected === 2) {
+            filteredShop = filteredShop.filter(section => {
+                // Check if the section has tiles
+                if (section.tiles) {
+                    // Filter through each tile
+                    section.tiles = section.tiles.filter(tile => {
+                        // Check if the tile has a list
+                        if (tile.list) {
+                            // Filter through each item in the list
+                            tile.list = tile.list.filter(item => {
+                                // Check if the mainType is sparks_song
+                                if (item.mainType === "sparks_song") {
+                                    return false; // Remove item
+                                } else {
+                                    // Check if displayAssets has Juno as primaryMode
+                                    item.displayAssets = item.displayAssets.filter(asset => asset.primaryMode === "Juno");
 
-    //                         // Remove the tile if its list is empty
-    //                         return tile.list.length > 0;
-    //                     } else {
-    //                         return false; // Remove tile if it has no list
-    //                     }
-    //                 });
+                                    // Remove the item if displayAssets is empty after filtering
+                                    return item.displayAssets.length > 0;
+                                }
+                            });
 
-    //                 // Remove the section if its tiles are empty
-    //                 return section.tiles.length > 0;
-    //             } else {
-    //                 return false; // Remove section if it has no tiles
-    //             }
-    //         });
-    //     }
-    //     else filteredShop = shop
+                            // Remove the tile if its list is empty
+                            return tile.list.length > 0;
+                        } else {
+                            return false; // Remove tile if it has no list
+                        }
+                    });
 
-    //     setSearchedShop(filteredShop);
+                    // Remove the section if its tiles are empty
+                    return section.tiles.length > 0;
+                } else {
+                    return false; // Remove section if it has no tiles
+                }
+            });
+        }
+        else if (selected === 3) {
+            filteredShop = filteredShop.filter(section => {
+                // Check if the section has tiles
+                if (section.tiles) {
+                    // Filter through each tile
+                    section.tiles = section.tiles.filter(tile => {
+                        // Check if the tile has a list
+                        if (tile.list) {
+                            // Filter through each item in the list
+                            tile.list = tile.list.filter(item => {
+                                // Check if the mainType is sparks_song
+                                if (item.mainType === "sparks_song") {
+                                    return true; // Remove item
+                                } else return false;
+                            });
 
-    // }, [shop, selected]);
+                            // Remove the tile if its list is empty
+                            return tile.list.length > 0;
+                        } else {
+                            return false; // Remove tile if it has no list
+                        }
+                    });
 
-    // useEffect(() => {
-    //     filterShop();
-    // }, [filterShop]);
+                    // Remove the section if its tiles are empty
+                    return section.tiles.length > 0;
+                } else {
+                    return false; // Remove section if it has no tiles
+                }
+            });
+        }
+        else if (selected === 4) {
+            filteredShop = filteredShop.filter(section => {
+                // Check if the section has tiles
+                if (section.tiles) {
+                    // Filter through each tile
+                    section.tiles = section.tiles.filter(tile => {
+                        // Check if the tile has a list
+                        if (tile.list) {
+                            // Filter through each item in the list
+                            tile.list = tile.list.filter(item => {
+                                // Check if the mainType is sparks_song
+                                if (item.mainType === "sparks_song") {
+                                    return false; // Remove item
+                                } else {
+
+                                    // Check if displayAssets has DelMar as primaryMode
+                                    item.displayAssets = item.displayAssets.filter(asset => asset.primaryMode === "DelMar");
+
+                                    // Remove the item if displayAssets is empty after filtering
+                                    return item.displayAssets.length > 0;
+                                }
+                            });
+
+                            // Remove the tile if its list is empty
+                            return tile.list.length > 0;
+                        } else {
+                            return false; // Remove tile if it has no list
+                        }
+                    });
+
+                    // Remove the section if its tiles are empty
+                    return section.tiles.length > 0;
+                } else {
+                    return false; // Remove section if it has no tiles
+                }
+            });
+        }
+
+        setSearchedShop(filteredShop);
+
+    }, [shop, selected]);
+
+    useEffect(() => {
+        filterShop();
+    }, [filterShop]);
 
     const fetchData = useCallback(async () => {
         try {
@@ -300,7 +313,7 @@ export default function Shop({ navigation }) {
                 <FlatList
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingLeft: 20 }}
+                    contentContainerStyle={{ paddingLeft: 20, flexGrow: 1 }}
                     data={item.tiles}
                     onEndReachedThreshold={0.1}
                     removeClippedSubviews={true}
@@ -315,20 +328,20 @@ export default function Shop({ navigation }) {
                                 [...Array(Math.ceil(ratio.list.length / 2))].map((_, colIndex) => (
                                     <View key={colIndex} style={{ flexDirection: 'column' }}>
                                         {ratio.list.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
-                                            <RNGHTouchableOpacity onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} key={`${colIndex}-${rowIndex}`} style={{ marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+                                            <RNGHTouchableOpacity onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} key={`${colIndex}-${rowIndex}`} style={{ borderRadius: 2, marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
 
                                                 <AutoScrollingScrollView
                                                     width={72}
                                                     height={72}
-                                                    images={offer.displayAssets.map(e => e.background + "?width=100")}
+                                                    images={offer.displayAssets.map(e => e.background + "?width=156")}
                                                 />
                                                 <LinearGradient
                                                     colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
                                                     style={{
                                                         position: 'absolute',
-                                                        bottom: 0,
-                                                        left: 0,
-                                                        right: 0,
+                                                        bottom: -2,
+                                                        left: -2,
+                                                        right: -2,
                                                         height: 30, // Adjust the height of the shadow as needed
                                                     }}
                                                 />
@@ -355,6 +368,34 @@ export default function Shop({ navigation }) {
                                                     left: 14,
                                                     fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
                                                 }}>{offer.price.finalPrice}</Text>
+                                                {
+                                                    bookmarks.includes(offer.mainId) ? (
+                                                        <Image style={{
+                                                            width: 15,
+                                                            height: 15,
+                                                            top: 0,
+                                                            right: 4,
+                                                            position: "absolute",
+                                                        }} source={require('../../assets/shop/bookmark.png')} />
+                                                    ) : null
+                                                }
+                                                {
+                                                    offer.banner ? (
+                                                        <View style={{
+                                                            backgroundColor: offer.banner.id === "New" ? "#eff727" : "#fff",
+                                                            borderRadius: 3,
+                                                            padding: 2,
+                                                            top: 2,
+                                                            left: 2,
+                                                            position: "absolute",
+                                                        }}>
+                                                            <Text style={{
+                                                                fontSize: 5,
+                                                                fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                            }}>{offer.banner.name.toUpperCase()}</Text>
+                                                        </View>
+                                                    ) : null
+                                                }
                                             </RNGHTouchableOpacity>
                                         ))}
                                     </View>
@@ -363,19 +404,19 @@ export default function Shop({ navigation }) {
                                 <View style={{ flexDirection: "row" }}>
                                     {
                                         ratio.list.map((offer, rowIndex) => (
-                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} style={{ marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} style={{ borderRadius: 2, marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
                                                 <AutoScrollingScrollView
                                                     width={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150}
                                                     height={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150}
-                                                    images={offer.displayAssets.map(e => e.background + "?width=265")}
+                                                    images={offer.displayAssets.map(e => e.background + "?width=256")}
                                                 />
                                                 <LinearGradient
                                                     colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
                                                     style={{
                                                         position: 'absolute',
                                                         bottom: -2,
-                                                        left: 0,
-                                                        right: 0,
+                                                        left: -2,
+                                                        right: -2,
                                                         height: 75, // Adjust the height of the shadow as needed
                                                     }}
                                                 />
@@ -402,6 +443,34 @@ export default function Shop({ navigation }) {
                                                     left: 15,
                                                     fontFamily: "BurbankSmall-Black"
                                                 }}>{offer.price.finalPrice}</Text>
+                                                {
+                                                    bookmarks.includes(offer.mainId) ? (
+                                                        <Image style={{
+                                                            width: 15,
+                                                            height: 15,
+                                                            top: 0,
+                                                            right: 4,
+                                                            position: "absolute",
+                                                        }} source={require('../../assets/shop/bookmark.png')} />
+                                                    ) : null
+                                                }
+                                                {
+                                                    offer.banner ? (
+                                                        <View style={{
+                                                            backgroundColor: offer.banner.id === "New" ? "#eff727" : "#fff",
+                                                            borderRadius: 3,
+                                                            padding: 2,
+                                                            top: 3,
+                                                            left: 3,
+                                                            position: "absolute",
+                                                        }}>
+                                                            <Text style={{
+                                                                fontSize: 5,
+                                                                fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                            }}>{offer.banner.name.toUpperCase()}</Text>
+                                                        </View>
+                                                    ) : null
+                                                }
                                             </RNGHTouchableOpacity>
                                         ))
                                     }
@@ -414,20 +483,31 @@ export default function Shop({ navigation }) {
         );
     }, [])
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await FileSystem.getInfoAsync(CACHE_FILE_URI)
+            .then(i => {
+                if (i.exists) FileSystem.deleteAsync(CACHE_FILE_URI).then(fetchData);
+                else fetchData()
+            })
+
+    }, [])
+
     return (
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
             <View style={{
-                alignItems: 'center',
                 justifyContent: 'center',
             }}>
 
                 <View style={{
+                    marginLeft: 20,
                     flexDirection: 'row',
                     marginTop: 50,
                     width: '90%',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: 20
+                    marginBottom: 20,
+                    alignItems: 'center',
                 }}>
 
                     <TouchableOpacity style={{
@@ -491,14 +571,17 @@ export default function Shop({ navigation }) {
                 </ScrollView>
 
                 <FlatList
-                    onEndReachedThreshold={0.1}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    data={loading ? [] : searchedShop}
                     removeClippedSubviews={true}
-                    maxToRenderPerBatch={20}
-                    updateCellsBatchingPeriod={5000}
-                    initialNumToRender={50}
-                    windowSize={15}
-                    data={shop}
+                    maxToRenderPerBatch={10}
+                    initialNumToRender={5}
+                    windowSize={10}
                     renderItem={loadShop}
+                    ListFooterComponent={() => { return loading ? <ActivityIndicator size="large" color="#1473FC" /> : null }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} style={{ marginTop: 5 }} />
+                    }
                 />
 
             </View>

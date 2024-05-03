@@ -465,7 +465,7 @@ export default function Details({ navigation }) {
                 <View style={{ flex: 1 }}>
                     {
                         receivedData.styles.length ? (
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20, flexGrow: 1 }}>
                                 <View style={{
                                     flexDirection: 'row',
                                     justifyContent: 'center',

@@ -616,7 +616,7 @@ export default function Home({ navigation }) {
                         const currentTime = new Date().getTime();
                         const modificationTimeMilliseconds = i.modificationTime * 1000
                         // Check if cached data is expired
-                        
+
                         if (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME) {
 
                             // If not expired, read cached data
@@ -883,26 +883,35 @@ export default function Home({ navigation }) {
 
                     <TouchableOpacity onPress={changeLng} style={{
                         flexDirection: 'row',
+                        alignItems: "center"
                     }}>
-                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 25,
-                        }} />
 
+                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 20,
+                            marginLeft: 5
+                        }} />
                         <View style={{
                             flexDirection: 'column',
                             marginLeft: 20,
                         }}>
-                            <Text style={{ color: 'white' }}>{t("good_morning")}</Text>
-                            <Text style={{
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                                color: 'white'
-                            }}>OHY_</Text>
+                        <Text style={{
+                            fontSize: 23,
+                            color: 'white',
+                            fontFamily: "BurbankSmall-Black"
+                        }}>{"OHY_".toUpperCase()}</Text>
                         </View>
+
                     </TouchableOpacity>
-                    <Octicons name="three-bars" size={30} color="white" />
+                    <View style={{
+                        flexDirection: 'row',
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}>
+
+                        <Octicons name="bell" color={"white"} size={25} />
+                    </View>
 
                 </View>
 

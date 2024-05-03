@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { StatusBar } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import { StyleSheet, Animated, Dimensions, Keyboard } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -63,7 +63,7 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Feather name="home" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
+                  <Feather name="home" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10, overflow: "hidden" }} />
                 ) : (
                   <Feather name="home" size={size} color={"white"} />
                 )
@@ -73,7 +73,7 @@ function HomeScreen() {
           listeners={({ navigation, route }) => ({
             tabPress: e => {
               Animated.spring(tabOffsetValue, {
-                toValue: 0,
+                toValue: Platform.OS === "ios" ? 2 : 0,
                 useNativeDriver: true
               }).start()
             }
@@ -87,7 +87,7 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <AntDesign name="appstore-o" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
+                  <AntDesign name="appstore-o" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10, overflow: "hidden" }} />
                 ) : (
                   <AntDesign name="appstore-o" size={size} color={"white"} />
                 )
@@ -135,7 +135,7 @@ function HomeScreen() {
             tabBarIcon: ({ focused, color, size }) => {
               return (
                 focused ? (
-                  <Feather name="user" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10 }} />
+                  <Feather name="user" size={size} color={"#009BFF"} style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 10, borderRadius: 10, overflow: "hidden" }} />
                 ) : (
                   <Feather name="user" size={size} color={"white"} />
                 )
@@ -156,11 +156,11 @@ function HomeScreen() {
 
       <Animated.View style={{
         display: isKeyboardOpen ? 'none' : 'flex',
-        width: getWidth() - 40,
+        width: Platform.OS === "ios" ? getWidth() - 45 : getWidth() - 40,
         height: 3,
         backgroundColor: "#009BFF",
         position: 'absolute',
-        bottom: 5,
+        bottom: Platform.OS === "ios" ? 20 : 5,
         left: 64,
         borderRadius: 5,
         transform: [{
@@ -177,9 +177,11 @@ function HomeScreen() {
 export default function App() {
   const HomeScreenStack = createStackNavigator()
   const Stack = createStackNavigator();
-  NavigationBar.setVisibilityAsync("hidden");
-  NavigationBar.setBackgroundColorAsync("black");
-  NavigationBar.useVisibility(null)
+  if(Platform.OS === "android"){
+    NavigationBar.setVisibilityAsync("hidden");
+    NavigationBar.setBackgroundColorAsync("black");
+    NavigationBar.useVisibility(null)
+  }
 
   const theme = {
     ...DefaultTheme,
@@ -254,7 +256,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#191919',
     borderColor: '#191919',
     backgroundColor: '#191919',
-    height: 70,
+    padding: Platform.OS === "ios" ? 15 : 0,
+    height: Platform.OS === "ios" ? 90 : 70,
     paddingHorizontal: 40,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
