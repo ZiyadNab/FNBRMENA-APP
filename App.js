@@ -17,6 +17,7 @@ import { PortalProvider } from '@gorhom/portal'
 import i18next from './localization/i18n.js'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
+import MapScreenUI from './src/main/map'
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -130,7 +131,7 @@ function HomeScreen() {
 
         <Tab.Screen
           name="Profile"
-          component={ItemshopScreenUI}
+          component={MapScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
               return (

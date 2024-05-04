@@ -328,12 +328,15 @@ export default function Shop({ navigation }) {
                                 [...Array(Math.ceil(ratio.list.length / 2))].map((_, colIndex) => (
                                     <View key={colIndex} style={{ flexDirection: 'column' }}>
                                         {ratio.list.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
-                                            <RNGHTouchableOpacity onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} key={`${colIndex}-${rowIndex}`} style={{ borderRadius: 2, marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+                                            <RNGHTouchableOpacity onPress={() => {
+                                                if(offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
+                                            }} key={`${colIndex}-${rowIndex}`} style={{ borderRadius: 2, marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
 
                                                 <AutoScrollingScrollView
                                                     width={72}
                                                     height={72}
-                                                    images={offer.displayAssets.map(e => e.background + "?width=156")}
+                                                    images={offer.displayAssets.length > 0 ? offer.displayAssets.map(e => e.background + "?width=156") : ["https://i.ibb.co/XCDwKHh/HVH5sqV.png"]}
+                                                    placeholder={offer.displayAssets.length === 0}
                                                 />
                                                 <LinearGradient
                                                     colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
@@ -404,11 +407,14 @@ export default function Shop({ navigation }) {
                                 <View style={{ flexDirection: "row" }}>
                                     {
                                         ratio.list.map((offer, rowIndex) => (
-                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => navigation.navigate("DetailsScreen", { data: offer.granted[0] })} style={{ borderRadius: 2, marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
+                                            <RNGHTouchableOpacity key={rowIndex} onPress={() => {
+                                                if(offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
+                                            }} style={{ borderRadius: 2, marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
                                                 <AutoScrollingScrollView
                                                     width={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150}
                                                     height={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150}
-                                                    images={offer.displayAssets.map(e => e.background + "?width=256")}
+                                                    images={offer.displayAssets.length > 0 ? offer.displayAssets.map(e => e.background + "?width=256") : ["https://i.ibb.co/XCDwKHh/HVH5sqV.png"]}
+                                                    placeholder={offer.displayAssets.length === 0}
                                                 />
                                                 <LinearGradient
                                                     colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
@@ -427,7 +433,7 @@ export default function Shop({ navigation }) {
                                                     bottom: 15,
                                                     left: 3,
                                                     fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
-                                                }}>{offer.displayName.toUpperCase()}</Text>
+                                                }}>{offer.displayName !== "" ? offer.displayName.toUpperCase() : t("updates_soon").toUpperCase()}</Text>
                                                 <Image style={{
                                                     position: "absolute",
                                                     bottom: 3,

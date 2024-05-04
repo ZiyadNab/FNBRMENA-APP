@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map Example</title>
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        /* Set the size of the map container to fill the screen */
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+            width: 100vw;
+            background-color: #303136;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map" class="leaflet-pane leaflet-tile-pane"></div>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map', {
+            minZoom: 0,
+            maxZoom: 7,
+            attributionControl: false,
+            zoomControl: false,
+        }).setView([0, 0], 0)
+
+        // Add the base tile layer
+        L.tileLayer('https://fnbrmena.com/api/v1/fortnite/map/{z}/{x}/{y}.jpg', {
+            noWrap: true,
+            tileSize: 256,
+
+        }).addTo(map);
+
+    </script>
+</body>
+
+</html>
