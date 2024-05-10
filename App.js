@@ -195,7 +195,7 @@ export default function App() {
 
   useEffect(() => {
 
-    const LANGUAGE_STORAGE_KEY = '@app_language';
+    const LANGUAGE_STORAGE_KEY = '@app_languagse';
     const loadLanguage = async () => {
       try {
         const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
