@@ -18,6 +18,9 @@ import i18next from './localization/i18n.js'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import MapScreenUI from './src/main/map'
+import getStartedScreen from './src/loginflow/get_started'
+import LoginScreen from './src/loginflow/login'
+import CreateAccountScreen from './src/loginflow/create'
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -178,7 +181,7 @@ function HomeScreen() {
 export default function App() {
   const HomeScreenStack = createStackNavigator()
   const Stack = createStackNavigator();
-  if(Platform.OS === "android"){
+  if (Platform.OS === "android") {
     NavigationBar.setVisibilityAsync("hidden");
     NavigationBar.setBackgroundColorAsync("black");
     NavigationBar.useVisibility(null)
@@ -195,7 +198,7 @@ export default function App() {
 
   useEffect(() => {
 
-    const LANGUAGE_STORAGE_KEY = '@app_languagse';
+    const LANGUAGE_STORAGE_KEY = '@app_language';
     const loadLanguage = async () => {
       try {
         const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
@@ -214,9 +217,43 @@ export default function App() {
     "BurbankBigCondensed-Black": require('./assets/fonts/BurbankBigCondensed-Black.ttf'),
     "BurbankSmall-Black": require('./assets/fonts/BurbankSmall-Black.otf'),
     "Lalezar-Regular": require('./assets/fonts/Lalezar-Regular.ttf'),
+    "GeneralSans-Variable": require('./assets/fonts/GeneralSans-Variable.ttf'),
   });
 
   if (!fontLoaded) return null
+
+  // return (
+  //   <GestureHandlerRootView style={{ flex: 1 }}>
+  //     <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
+  //     <PortalProvider>
+  //       <NavigationContainer theme={theme}>
+  //         <HomeScreenStack.Navigator
+  //           screenOptions={{
+  //             headerShown: false,
+  //           }}>
+
+  //           <HomeScreenStack.Screen
+  //             name="HomeScreen"
+  //             component={HomeScreen}
+
+  //           />
+
+  //           <HomeScreenStack.Screen
+  //             name="DetailsScreen"
+  //             component={DetailsScreenUI}
+  //           />
+
+  //           <HomeScreenStack.Screen
+  //             name="QuestsBundleScreen"
+  //             component={QuestsBundleScreenUI}
+  //           />
+
+  //         </HomeScreenStack.Navigator>
+  //       </NavigationContainer>
+  //     </PortalProvider>
+  //   </GestureHandlerRootView>
+
+  // )
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -229,19 +266,21 @@ export default function App() {
             }}>
 
             <HomeScreenStack.Screen
-              name="HomeScreen"
-              component={HomeScreen}
+              name="getStarted"
+              component={getStartedScreen}
 
             />
 
             <HomeScreenStack.Screen
-              name="DetailsScreen"
-              component={DetailsScreenUI}
+              name="LoginScreen"
+              component={LoginScreen}
+
             />
 
             <HomeScreenStack.Screen
-              name="QuestsBundleScreen"
-              component={QuestsBundleScreenUI}
+              name="CreateAccountScreen"
+              component={CreateAccountScreen}
+
             />
 
           </HomeScreenStack.Navigator>
@@ -251,6 +290,8 @@ export default function App() {
 
   )
 }
+
+
 
 const styles = StyleSheet.create({
   tabBar: {
