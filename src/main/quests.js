@@ -111,42 +111,8 @@ export default function Quests({ navigation }) {
             <View style={{
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginTop: 10
             }}>
-
-
-                <View style={{
-                    flexDirection: 'row',
-                    marginTop: 50,
-                    width: '90%',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 20
-                }}>
-
-                    <TouchableOpacity style={{
-                        flexDirection: 'row',
-                    }}>
-                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 25,
-                        }} />
-
-                        <View style={{
-                            flexDirection: 'column',
-                            marginLeft: 20,
-                        }}>
-                            <Text style={{ color: 'white' }}>{t("good_morning")}</Text>
-                            <Text style={{
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                                color: 'white'
-                            }}>OHY_</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <Octicons name="three-bars" size={30} color="white" />
-
-                </View>
 
                 <FlatList
                     showsVerticalScrollIndicator={false}

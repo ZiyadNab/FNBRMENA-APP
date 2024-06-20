@@ -7,7 +7,7 @@ import {
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios'
-import RenderImage from '../helpers/list'
+import RenderImage from '../helpers/RenderItem'
 import { Image } from 'expo-image';
 import BottomSheet from '../helpers/BottomSheet';
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-native-gesture-handler';
@@ -453,7 +453,7 @@ export default function Home({ navigation }) {
             "season": 23,
             "chapter": 4,
             "seasonInChapter": 1,
-            "displayName": t("s24"),
+            "displayName": t("s23"),
             "startDate": "2022-12-04 08:00:00+00:00",
             "endDate": "2023-03-10 05:59:59+00:00",
             "path": require('../../assets/seasons/c4s1.png')
@@ -462,7 +462,7 @@ export default function Home({ navigation }) {
             "season": 24,
             "chapter": 4,
             "seasonInChapter": 2,
-            "displayName": t("s25"),
+            "displayName": t("s24"),
             "startDate": "2023-03-10 06:00:00+00:00",
             "endDate": "2023-06-09 05:59:59+00:00",
             "path": require('../../assets/seasons/c4s2.png')
@@ -523,12 +523,17 @@ export default function Home({ navigation }) {
     const [searchedCosmetics, setSearchedCosmetics] = useState([])
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [sortType, setSortType] = useState("of")
     const [filterQuery, setFilterQuery] = useState({
         rarity: [],
         source: [],
         tags: [],
-        chapters: []
+        chapters: [],
+        sortOldestFirst: true,
+        sortNewestFirst: false,
+        sortShopLongest: false,
+        sortShopRecent: false,
+        sortATOZ: false,
+        sortZTOA: false
     });
     const bottomSheetRef = useRef()
 
@@ -594,6 +599,42 @@ export default function Home({ navigation }) {
             filteredCosmetics = filteredCosmetics.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()));
         }
 
+        if (filterQuery.sortNewestFirst) {
+            filteredCosmetics.sort((a, b) => new Date(b.added.date) - new Date(a.added.date));
+        }
+
+        if (filterQuery.sortOldestFirst) {
+            filteredCosmetics.sort((a, b) => new Date(a.added.date) - new Date(b.added.date));
+        }
+
+        if (filterQuery.sortShopLongest) {
+            filteredCosmetics.sort((a, b) => new Date(a.lastAppearance) - new Date(b.lastAppearance));
+        }
+
+        if (filterQuery.sortShopRecent) {
+            filteredCosmetics.sort((a, b) => new Date(b.lastAppearance) - new Date(a.lastAppearance));
+        }
+
+        if (filterQuery.sortATOZ) {
+            filteredCosmetics.sort((a, b) => {
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
+        }
+
+        if (filterQuery.sortZTOA) {
+            filteredCosmetics.sort((a, b) => {
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA > nameB) return -1;
+                if (nameA < nameB) return 1;
+                return 0;
+            });
+        }
+
         setSearchedCosmetics(filteredCosmetics);
 
     }, [cosmetics, searchText, selected, filterQuery]);
@@ -606,63 +647,51 @@ export default function Home({ navigation }) {
         fetchData();
     }, [i18next.language]);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (forceRefresh = false) => {
         try {
             setLoading(true);
             let cachedData = null;
-            await FileSystem.getInfoAsync(CACHE_FILE_URI)
-                .then(async i => {
-                    if (i.exists) {
-                        const currentTime = new Date().getTime();
-                        const modificationTimeMilliseconds = i.modificationTime * 1000
-                        // Check if cached data is expired
+            const fileInfo = await FileSystem.getInfoAsync(CACHE_FILE_URI);
 
-                        if (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME) {
+            if (fileInfo.exists) {
+                const currentTime = new Date().getTime();
+                const modificationTimeMilliseconds = fileInfo.modificationTime * 1000;
 
-                            // If not expired, read cached data
-                            cachedData = await FileSystem.readAsStringAsync(CACHE_FILE_URI);
-                        }
+                if (!forceRefresh && (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME)) {
+                    cachedData = await FileSystem.readAsStringAsync(CACHE_FILE_URI);
+                }
+            }
+
+            if (!cachedData || i18next.language !== cachedLanguage || forceRefresh) {
+                const response = await axios(`https://fortniteapi.io/v2/items/list?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
+                    headers: {
+                        'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
                     }
+                });
 
-                    if (!cachedData || i18next.language !== cachedLanguage) {
+                const jsonData = await response.data;
+                const newData = JSON.stringify(jsonData.items);
+                await FileSystem.writeAsStringAsync(CACHE_FILE_URI, newData, { encoding: FileSystem.EncodingType.UTF8 });
+                cachedData = newData;
+                cachedLanguage = i18next.language;
+            }
 
-                        // Fetch data from API if no cached data or expired
-                        const response = await axios(`https://fortniteapi.io/v2/items/list?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
-                            headers: {
-                                'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
-                            }
-                        })
-
-                        const jsonData = await response.data;
-                        // Save fetched data to cache
-                        await FileSystem.writeAsStringAsync(CACHE_FILE_URI, JSON.stringify(jsonData.items), { encoding: FileSystem.EncodingType.UTF8 })
-                        cachedData = JSON.stringify(jsonData.items);
-                        cachedLanguage = i18next.language
-                    }
-
-                    const removeUnWantedItems = JSON.parse(cachedData).filter(item => item.name !== "")
-                    const list = removeUnWantedItems.sort((a, b) => new Date(a.added.date) - new Date(b.added.date))
-                    setCosmetics(list);
-                    setLoading(false);
-                    setRefreshing(false);
-                })
-
-
+            const removeUnWantedItems = JSON.parse(cachedData).filter(item => item.name !== "");
+            const list = removeUnWantedItems.sort((a, b) => new Date(a.added.date) - new Date(b.added.date));
+            setCosmetics(list);
         } catch (error) {
             console.error('Error fetching data:', error);
-            setRefreshing(false); // Set refreshing to false if there's an error
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
         }
-    }, [])
+    }, [i18next.language]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await FileSystem.getInfoAsync(CACHE_FILE_URI)
-            .then(i => {
-                if (i.exists) FileSystem.deleteAsync(CACHE_FILE_URI).then(fetchData);
-                else fetchData()
-            })
+        await fetchData(true);
+    }, [fetchData]);
 
-    }, [])
 
     const getRarityPath = useCallback((rarity) => {
         const rarityLower = rarity.toLowerCase();
@@ -743,64 +772,27 @@ export default function Home({ navigation }) {
             rarity: [],
             source: [],
             tags: [],
-            chapters: []
+            chapters: [],
+            sortOldestFirst: true,
+            sortNewestFirst: false,
+            sortShopLongest: false,
+            sortShopRecent: false,
+            sortATOZ: false,
+            sortZTOA: false
         })
     }
 
-    const sortNewestFirst = () => {
-        setSortType("nf")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => new Date(b.added.date) - new Date(a.added.date));
-        setCosmetics(sortedData);
-
-    }
-
-    const sortOldestFirst = () => {
-        setSortType("of")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => new Date(a.added.date) - new Date(b.added.date));
-        setCosmetics(sortedData);
-    }
-
-    const sortShopLongest = () => {
-        setSortType("sl")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => new Date(a.lastAppearance) - new Date(b.lastAppearance));
-        setCosmetics(sortedData);
-    }
-
-    const sortShopRecent = () => {
-        setSortType("sr")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => new Date(b.lastAppearance) - new Date(a.lastAppearance));
-        setCosmetics(sortedData);
-    }
-
-    function sortATOZ() {
-        setSortType("az")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => {
-            const nameA = a.name.toUpperCase();
-            const nameB = b.name.toUpperCase();
-            if (nameA < nameB) return -1;
-            if (nameA > nameB) return 1;
-            return 0;
-        });
-        setCosmetics(sortedData);
-    }
-
-    function sortZTOA() {
-        setSortType("za")
-        const sortedData = [...cosmetics];
-        sortedData.sort((a, b) => {
-            const nameA = a.name.toUpperCase();
-            const nameB = b.name.toUpperCase();
-            if (nameA > nameB) return -1;
-            if (nameA < nameB) return 1;
-            return 0;
-        });
-        setCosmetics(sortedData);
-    }
+    const setSortFilter = useCallback((sortType) => {
+        setFilterQuery(prevState => ({
+            ...prevState,
+            sortNewestFirst: sortType === 'newest',
+            sortOldestFirst: sortType === 'oldest',
+            sortShopLongest: sortType === 'shopLongest',
+            sortShopRecent: sortType === 'shopRecent',
+            sortATOZ: sortType === 'atoz',
+            sortZTOA: sortType === 'ztoa'
+        }));
+    }, [])
 
     const handleRarityButtonClick = useCallback((rarity) => {
         toggleFilter('rarity', rarity);
@@ -871,52 +863,74 @@ export default function Home({ navigation }) {
             <View style={{
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginTop: 10,
             }}>
-                <View style={{
+                {/* <View style={{
+                    marginTop: 40,
                     flexDirection: 'row',
-                    marginTop: 50,
-                    width: '90%',
+                    width: '92%',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: 20
+                    marginBottom: 15
                 }}>
 
-                    <TouchableOpacity onPress={changeLng} style={{
+                    <TouchableOpacity style={{
                         flexDirection: 'row',
                         alignItems: "center"
                     }}>
 
-                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 20,
-                            marginLeft: 5
-                        }} />
-                        <View style={{
-                            flexDirection: 'column',
-                            marginLeft: 20,
-                        }}>
                         <Text style={{
-                            fontSize: 23,
+                            fontSize: 25,
                             color: 'white',
-                            fontFamily: "BurbankSmall-Black"
-                        }}>{"OHY_".toUpperCase()}</Text>
-                        </View>
+                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black"
+                        }}>{t("cosmetics").toUpperCase()}</Text>
 
                     </TouchableOpacity>
+
                     <View style={{
                         flexDirection: 'row',
-                        justifyContent: "center",
-                        alignItems: "center"
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                     }}>
 
-                        <Octicons name="bell" color={"white"} size={25} />
+                        <View style={{
+                            flexDirection: 'row',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderTopLeftRadius: 15,
+                            borderBottomLeftRadius: 15,
+                            borderTopRightRadius: 15,
+                            borderBottomRightRadius: 15,
+                            alignItems: 'center',
+                            paddingLeft: 7,
+                            justifyContent: 'center',
+                        }}>
+
+                            <Image source={require('../../assets/cosmetics/others/vbucks.png')} style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 10,
+                                marginRight: 3
+                            }} />
+
+                            <Text style={{
+                                color: 'white',
+                                fontFamily: 'BurbankSmall-Black',
+                                fontSize: 16,
+                                marginRight: 5
+                            }}>13,850</Text>
+
+                            <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-brite-raider-icon-200x200-d2cb95034d11.png' }} style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 15,
+                            }} />
+                        </View>
                     </View>
 
-                </View>
+                </View> */}
 
                 <View style={{
-                    width: '90%',
+                    width: '91%',
                     height: 40,
                     backgroundColor: '#191919',
                     borderRadius: 5,
@@ -968,7 +982,7 @@ export default function Home({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
+                <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 17 }}>
                     <View style={{
                         flexDirection: 'row',
                         justifyContent: 'center',
@@ -1007,7 +1021,7 @@ export default function Home({ navigation }) {
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     data={loading ? [] : searchedCosmetics}
-                    renderItem={({ item }) => <RenderImage item={item} navigation={navigation} />}
+                    renderItem={({ item }) => <RenderImage item={item} navigation={navigation} bottomSheetRef={bottomSheetRef} />}
                     keyExtractor={(item, index) => index.toString()}
                     numColumns={3}
                     onEndReachedThreshold={0.1}
@@ -1344,7 +1358,7 @@ export default function Home({ navigation }) {
                                         flexDirection: 'row',
                                         marginBottom: 5
                                     }}>
-                                        <RNGHTouchableOpacity onPress={sortNewestFirst} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('newest')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1354,8 +1368,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "nf" ? 2 : null,
-                                            borderColor: sortType === "nf" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortNewestFirst ? 2 : null,
+                                            borderColor: filterQuery.sortNewestFirst ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1364,7 +1378,7 @@ export default function Home({ navigation }) {
                                             }}>{t("newest_first").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
-                                        <RNGHTouchableOpacity onPress={sortOldestFirst} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('oldest')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1374,8 +1388,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "of" ? 2 : null,
-                                            borderColor: sortType === "of" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortOldestFirst ? 2 : null,
+                                            borderColor: filterQuery.sortOldestFirst ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1389,7 +1403,7 @@ export default function Home({ navigation }) {
                                         flexDirection: 'row',
                                         marginBottom: 5
                                     }}>
-                                        <RNGHTouchableOpacity onPress={sortShopRecent} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('shopRecent')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1399,8 +1413,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "sr" ? 2 : null,
-                                            borderColor: sortType === "sr" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortShopRecent ? 2 : null,
+                                            borderColor: filterQuery.sortShopRecent ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1409,7 +1423,7 @@ export default function Home({ navigation }) {
                                             }}>{t("shop_recent").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
-                                        <RNGHTouchableOpacity onPress={sortShopLongest} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('shopLongest')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1419,8 +1433,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "sl" ? 2 : null,
-                                            borderColor: sortType === "sl" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortShopLongest ? 2 : null,
+                                            borderColor: filterQuery.sortShopLongest ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1434,7 +1448,7 @@ export default function Home({ navigation }) {
                                         flexDirection: 'row',
                                         marginBottom: 5
                                     }}>
-                                        <RNGHTouchableOpacity onPress={sortATOZ} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('atoz')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1444,8 +1458,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "az" ? 2 : null,
-                                            borderColor: sortType === "az" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortATOZ ? 2 : null,
+                                            borderColor: filterQuery.sortATOZ ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1454,7 +1468,7 @@ export default function Home({ navigation }) {
                                             }}>{t("atoz").toUpperCase()}</Text>
                                         </RNGHTouchableOpacity>
 
-                                        <RNGHTouchableOpacity onPress={sortZTOA} style={{
+                                        <RNGHTouchableOpacity onPress={() => setSortFilter('ztoa')} style={{
                                             marginRight: 5,
                                             height: 60,
                                             borderRadius: 10,
@@ -1464,8 +1478,8 @@ export default function Home({ navigation }) {
                                             flexDirection: 'row',
                                             justifyContent: 'center',
                                             width: 170,
-                                            borderWidth: sortType === "za" ? 2 : null,
-                                            borderColor: sortType === "za" ? colors.app.buttons : null,
+                                            borderWidth: filterQuery.sortZTOA ? 2 : null,
+                                            borderColor: filterQuery.sortZTOA ? colors.app.buttons : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',

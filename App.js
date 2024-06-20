@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Platform, StatusBar } from 'react-native';
+import { Platform, StatusBar, View, TouchableOpacity, Text, Image } from 'react-native';
 import { StyleSheet, Animated, Dimensions, Keyboard } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -15,12 +15,14 @@ import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated'
 import { PortalProvider } from '@gorhom/portal'
 import i18next from './localization/i18n.js'
+import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import MapScreenUI from './src/main/map'
 import getStartedScreen from './src/loginflow/get_started'
 import LoginScreen from './src/loginflow/login'
 import CreateAccountScreen from './src/loginflow/create'
+import { BookmarkProvider } from './src/helpers/bookmark';
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -29,6 +31,7 @@ function getWidth() {
 }
 
 function HomeScreen() {
+  const { t } = useTranslation()
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -53,15 +56,97 @@ function HomeScreen() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
       <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
+        screenOptions={({ route }) => ({
           tabBarShowLabel: false,
           tabBarStyle: [styles.tabBar, { opacity: isKeyboardOpen ? 0 : 1 }],
+          headerStyle: {
+            backgroundColor: 'black',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black",
+            fontSize: 30
+          },
+          headerTitle: (props) => <View style={{
+            paddingTop: 10,
+            flexDirection: 'row',
+            width: '100%',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 15
+          }}>
 
-        }}>
+            <TouchableOpacity style={{
+              flexDirection: 'row',
+              alignItems: "center"
+            }}>
+
+              <Text style={{
+                fontSize: 25,
+                color: 'white',
+                fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black"
+              }}>{t(route.name).toUpperCase()}</Text>
+
+            </TouchableOpacity>
+
+            <View style={{
+              flexDirection: 'row',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: 15,
+              alignItems: 'center',
+              paddingLeft: 3,
+              justifyContent: 'center',
+            }}>
+
+              <View style={{
+                flexDirection: 'row',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 15,
+                alignItems: 'center',
+                paddingLeft: 3,
+                justifyContent: 'center',
+                marginRight: 5
+              }}>
+                <Image source={require('./assets/cosmetics/others/vbucks.png')} style={{
+                  width: 25,
+                  height: 25,
+                  marginRight: 3
+                }} />
+
+                <Text style={{
+                  color: 'white',
+                  fontFamily: 'BurbankSmall-Black',
+                  fontSize: 16,
+                  marginRight: 5
+                }}>13,850</Text>
+              </View>
+
+              <View>
+                <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-brite-raider-icon-200x200-d2cb95034d11.png' }} style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 15,
+                }} />
+                <View style={{
+                  backgroundColor: '#57F000',
+                  position: 'absolute',
+                  width: 13,
+                  height: 13,
+                  borderRadius: 6.5,
+                  bottom: -3,
+                  right: -3,
+                  borderWidth: 2,
+                  borderColor: 'black'
+                }} />
+              </View>
+
+            </View>
+
+          </View>
+        })}>
 
         <Tab.Screen
-          name="Cosmetics"
+          name="cosmetics"
           component={CosmeticsScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
@@ -109,7 +194,7 @@ function HomeScreen() {
         />
 
         <Tab.Screen
-          name="ItemShop"
+          name="itemshop"
           component={ItemshopScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
@@ -133,7 +218,7 @@ function HomeScreen() {
         />
 
         <Tab.Screen
-          name="Profile"
+          name="map"
           component={MapScreenUI}
           options={{
             tabBarIcon: ({ focused, color, size }) => {
@@ -222,6 +307,40 @@ export default function App() {
 
   if (!fontLoaded) return null
 
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
+      <PortalProvider>
+        <BookmarkProvider>
+          <NavigationContainer theme={theme}>
+            <HomeScreenStack.Navigator screenOptions={{
+              headerShown: false
+            }}>
+
+              <HomeScreenStack.Screen
+                name="Cosmetics"
+                component={HomeScreen}
+
+              />
+
+              <HomeScreenStack.Screen
+                name="DetailsScreen"
+                component={DetailsScreenUI}
+              />
+
+              <HomeScreenStack.Screen
+                name="QuestsBundleScreen"
+                component={QuestsBundleScreenUI}
+              />
+
+            </HomeScreenStack.Navigator>
+          </NavigationContainer>
+        </BookmarkProvider>
+      </PortalProvider>
+    </GestureHandlerRootView>
+
+  )
+
   // return (
   //   <GestureHandlerRootView style={{ flex: 1 }}>
   //     <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
@@ -233,19 +352,21 @@ export default function App() {
   //           }}>
 
   //           <HomeScreenStack.Screen
-  //             name="HomeScreen"
-  //             component={HomeScreen}
+  //             name="getStarted"
+  //             component={getStartedScreen}
 
   //           />
 
   //           <HomeScreenStack.Screen
-  //             name="DetailsScreen"
-  //             component={DetailsScreenUI}
+  //             name="LoginScreen"
+  //             component={LoginScreen}
+
   //           />
 
   //           <HomeScreenStack.Screen
-  //             name="QuestsBundleScreen"
-  //             component={QuestsBundleScreenUI}
+  //             name="CreateAccountScreen"
+  //             component={CreateAccountScreen}
+
   //           />
 
   //         </HomeScreenStack.Navigator>
@@ -254,41 +375,6 @@ export default function App() {
   //   </GestureHandlerRootView>
 
   // )
-
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
-      <PortalProvider>
-        <NavigationContainer theme={theme}>
-          <HomeScreenStack.Navigator
-            screenOptions={{
-              headerShown: false,
-            }}>
-
-            <HomeScreenStack.Screen
-              name="getStarted"
-              component={getStartedScreen}
-
-            />
-
-            <HomeScreenStack.Screen
-              name="LoginScreen"
-              component={LoginScreen}
-
-            />
-
-            <HomeScreenStack.Screen
-              name="CreateAccountScreen"
-              component={CreateAccountScreen}
-
-            />
-
-          </HomeScreenStack.Navigator>
-        </NavigationContainer>
-      </PortalProvider>
-    </GestureHandlerRootView>
-
-  )
 }
 
 

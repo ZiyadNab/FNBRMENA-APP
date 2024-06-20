@@ -11,6 +11,7 @@ import i18next from '../../localization/i18n.js'
 import axios from 'axios'
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView, FlatList } from 'react-native-gesture-handler';
 import AutoScrollingScrollView from '../helpers/imageSlider';
+import Timer from '../helpers/shoptimer';
 
 export default function Shop({ navigation }) {
     const { t } = useTranslation()
@@ -300,14 +301,57 @@ export default function Shop({ navigation }) {
         fetchData();
     }, [i18next.language]);
 
+    function convertToSectionsWithItems(data) {
+        const sectionsMap = new Map();
+
+        data.forEach(item => {
+            const sectionId = item.section.id;
+            if (!sectionsMap.has(sectionId)) {
+                sectionsMap.set(sectionId, {
+                    id: item.section.id,
+                    name: item.section.name,
+                    category: item.section.category,
+                    landingPriority: item.section.landingPriority,
+                    itemsCount: 0,
+                    tiles: []
+                });
+            }
+
+            const section = sectionsMap.get(sectionId);
+            const existingTileSizeObj = section.tiles.find(obj => obj.tileSize === item.tileSize);
+            if (!existingTileSizeObj) {
+                section.tiles.push({
+                    tileSize: item.tileSize,
+                    list: [item]
+                });
+                section.itemsCount += 1;
+            } else {
+                existingTileSizeObj.list.push(item);
+                section.itemsCount += 1;
+            }
+        });
+
+        return Array.from(sectionsMap.values());
+    }
+
     const loadShop = useCallback(({ item, index }) => {
 
         return (
             <View style={{ marginBottom: 15 }}>
-                <View style={{ paddingHorizontal: 20, flexDirection: "row", marginBottom: 5 }}>
+                <View style={{ paddingLeft: 20, flexDirection: "row", alignItems: "center", marginBottom: 5, paddingRight: 10 }}>
                     <Text style={{ color: "white", fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black", fontSize: 20, marginRight: 5 }}>{item.name.toUpperCase()}</Text>
-                    <View style={{ backgroundColor: "#009BFF", justifyContent: "center", alignItems: "center", paddingHorizontal: 5, borderRadius: 5 }}>
-                        <Text style={{ color: "white", fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black", fontSize: 15 }}>{item.itemsCount} {item.itemsCount > 1 ? t("items").toUpperCase() : t("item").toUpperCase()}</Text>
+                    <View style={{ backgroundColor: "red", justifyContent: "center", alignItems: "center", paddingHorizontal: 5, borderRadius: 5, height: 18, flexDirection: "row" }}>
+                        {/* <Text style={{ color: "white", fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black", fontSize: 15 }}>{item.itemsCount} {item.itemsCount > 1 ? t("items").toUpperCase() : t("item").toUpperCase()}</Text> */}
+                        <Image source={require("../../assets/shop/timer.png")} style={{
+                            width: 15,
+                            height: 15,
+                            marginRight: 3
+                        }} />
+                        <Timer targetDate={item.tiles[0].list[0].offerDates.out} style={{
+                            fontSize: 10,
+                            color: "white",
+                            fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
+                        }} />
                     </View>
                 </View>
                 <FlatList
@@ -329,7 +373,7 @@ export default function Shop({ navigation }) {
                                     <View key={colIndex} style={{ flexDirection: 'column' }}>
                                         {ratio.list.slice(colIndex * 2, colIndex * 2 + 2).map((offer, rowIndex) => (
                                             <RNGHTouchableOpacity onPress={() => {
-                                                if(offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
+                                                if (offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
                                             }} key={`${colIndex}-${rowIndex}`} style={{ borderRadius: 2, marginRight: 5, marginBottom: rowIndex === 0 ? 5 : 0, width: 72, height: 72, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
 
                                                 <AutoScrollingScrollView
@@ -399,6 +443,23 @@ export default function Shop({ navigation }) {
                                                         </View>
                                                     ) : null
                                                 }
+                                                {/* {
+                                                    offer.offerDates ? (
+                                                        <View style={{
+                                                            backgroundColor: "#fff",
+                                                            borderRadius: 3,
+                                                            padding: 2,
+                                                            top: 2,
+                                                            left: 2,
+                                                            position: "absolute",
+                                                        }}>
+                                                            <Timer targetDate={offer.offerDates.out} style={{
+                                                                fontSize: 5,
+                                                                fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black"
+                                                            }} />
+                                                        </View>
+                                                    ) : null
+                                                } */}
                                             </RNGHTouchableOpacity>
                                         ))}
                                     </View>
@@ -408,7 +469,7 @@ export default function Shop({ navigation }) {
                                     {
                                         ratio.list.map((offer, rowIndex) => (
                                             <RNGHTouchableOpacity key={rowIndex} onPress={() => {
-                                                if(offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
+                                                if (offer.granted.length > 0) navigation.navigate("DetailsScreen", { data: offer.granted[0] })
                                             }} style={{ borderRadius: 2, marginRight: 5, width: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150, height: offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 150 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 150 : 150, overflow: 'hidden', backgroundColor: '#191919', position: "relative" }}>
                                                 <AutoScrollingScrollView
                                                     width={offer.tileSize === "Size_3_x_2" || offer.tileSize === "TripleWide" ? 170 : offer.tileSize === "Size_2_x_2" ? 150 : offer.tileSize === "Size_1_x_2" ? 82 : 150}
@@ -426,6 +487,20 @@ export default function Shop({ navigation }) {
                                                         height: 75, // Adjust the height of the shadow as needed
                                                     }}
                                                 />
+                                                {/* <View style={{
+                                                    backgroundColor: "#fff",
+                                                    borderRadius: 3,
+                                                    padding: 2,
+                                                    position: "absolute",
+                                                    bottom: 30,
+                                                    left: 3,
+                                                }}>
+                                                    <Timer targetDate={offer.offerDates.out} style={{
+                                                        fontSize: 5,
+                                                        color: "black",
+                                                        fontFamily: cachedLanguage === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
+                                                    }} />
+                                                </View> */}
                                                 <Text style={{
                                                     fontSize: 12,
                                                     color: "white",
@@ -503,43 +578,8 @@ export default function Shop({ navigation }) {
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
             <View style={{
                 justifyContent: 'center',
+                marginTop: 20,
             }}>
-
-                <View style={{
-                    marginLeft: 20,
-                    flexDirection: 'row',
-                    marginTop: 50,
-                    width: '90%',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 20,
-                    alignItems: 'center',
-                }}>
-
-                    <TouchableOpacity style={{
-                        flexDirection: 'row',
-                    }}>
-                        <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-zeus-icon-200x200-60318da67e43.png' }} style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 25,
-                        }} />
-
-                        <View style={{
-                            flexDirection: 'column',
-                            marginLeft: 20,
-                        }}>
-                            <Text style={{ color: 'white' }}>{t("good_morning")}</Text>
-                            <Text style={{
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                                color: 'white'
-                            }}>OHY_</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <Octicons name="three-bars" size={30} color="white" />
-
-                </View>
 
                 <ScrollView horizontal={true} directionalLockEnabled={true} bounces={false} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 20 }}>
                     <View style={{

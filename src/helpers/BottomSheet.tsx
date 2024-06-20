@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet, Platform, View, Text, NativeScrollEvent } from 'react-native';
 import React, { useCallback, useRef, useImperativeHandle, useState } from 'react';
 import { Gesture, GestureDetector, TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
+import { Octicons } from '@expo/vector-icons';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -31,6 +32,10 @@ type BottomSheetProps = {
   onTranslationYChange?: (translationY: number, animated: boolean) => void;
   background?: BackgroundColors;
   type?: string
+  audio?: {
+    function: null | Function
+    value: null | boolean
+  }
 };
 
 export type BottomSheetRefProps = {
@@ -40,7 +45,7 @@ export type BottomSheetRefProps = {
 };
 
 const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
-  ({ children, onTranslationYChange, background, type }, ref) => {
+  ({ children, onTranslationYChange, background, type, audio = { function: null, value: null } }, ref) => {
     const translateY = useSharedValue(type === "details" ? -385 : 100);
     const active = useSharedValue(false);
     const data = useSharedValue(false);
@@ -150,6 +155,33 @@ const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
           }
           <TouchableOpacity onPress={checkSheetActive}>
             <View style={styles.line} />
+            {
+              audio.function ? (
+                <View style={{
+                  position: 'absolute',
+                  right: 5,
+                  bottom: 10
+                }}>
+                  <TouchableOpacity onPress={() => audio.function(!audio.value)} style={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                    borderRadius: 20,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 5, // Add margin between buttons for spacing
+                  }}>
+                    {
+                      audio.value ? (
+                        <Octicons name='mute' size={20} color={"white"} />
+                      ) : (
+                        <Octicons name='unmute' size={20} color={"white"} />
+                      )
+                    }
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            }
           </TouchableOpacity>
           <Animated.View style={[{ width: '100%', height: '100%', backgroundColor: type === "details" ? 'rgba(0, 0, 0, 0.5)' : null }, rBottomSheetStyle]}>
             <GestureDetector

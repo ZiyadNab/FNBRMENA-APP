@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "FNBRMENA",
+    "slug": "fnbrmena",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c7cec754-13c9-4621-8cef-76adf89531d0"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.ziyadnabil.fnbrmena"
+    }
+  }
+}

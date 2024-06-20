@@ -18,6 +18,7 @@ import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-nati
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useTranslation } from 'react-i18next';
+import { useBookmarks } from '../helpers/bookmark';
 import i18next from '../../localization/i18n.js'
 
 export default function Details({ navigation }) {
@@ -29,152 +30,193 @@ export default function Details({ navigation }) {
     const [mute, setMute] = useState(true)
     const [resume, setResume] = useState(true)
     const bottomSheetRef = useRef(null);
-    const translateY = useSharedValue(screenHeight - 362);
+    const translateY = useSharedValue(screenHeight - (receivedData.previewVideos.length ? 200 : 361));
     const [player, setPlayer] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [styleIndex, setStyleIndex] = useState(0)
     const [assetsIndex, setAssetsIndex] = useState(0)
     const [assets, setAssets] = useState([])
-    const [playerData, setPlayerData] = useState({
-        bookmarked: false,
-    })
-
-    useEffect(() => {
-        const data = []
-        data.push(...receivedData.displayAssets)
-        if (receivedData.images.icon) data.push(
-            {
-                url: receivedData.images.icon,
-                displayAsset: receivedData.name + "_icon"
-            }
-        )
-
-        setAssets(data)
-
-    }, []);
-
-    const downloadImage = async (imageUrl) => {
-        const downloadResumable = FileSystem.createDownloadResumable(
-            imageUrl,
-            `${FileSystem.cacheDirectory}${assets[assetsIndex].displayAsset}.png`,
-            {},
-        );
-
-        const downloadedFile = await downloadResumable.downloadAsync()
-        await MediaLibrary.createAssetAsync(downloadedFile.uri);
-        await FileSystem.deleteAsync(downloadedFile.uri)
-        alert('Image downloaded successfully!');
-    };
-
-    useEffect(() => {
-        let audioPlayer
-        async function playAudio() {
-
-            audioPlayer = new Audio.Sound()
-            await audioPlayer.loadAsync({
-                uri: receivedData.audio
-            })
-
-            setPlayer(audioPlayer);
-            await audioPlayer.setIsMutedAsync(true)
-            setMute(true)
-            await audioPlayer.playAsync()
-        }
-
-        if (receivedData.audio !== null) playAudio()
-
-        return () => {
-            if (audioPlayer) {
-                audioPlayer.stopAsync();
-                audioPlayer.unloadAsync();
-            }
-        };
-    }, [receivedData.audio])
+    const { bookmarks, toggleBookmark } = useBookmarks();
+    const isBookmarked = bookmarks.includes(receivedData.id);
 
     const handleTranslationYChange = (value, animated) => {
-        if (animated) translateY.value = withSpring((screenHeight + value) + 23, { damping: 15 });
-        else translateY.value = (screenHeight + value) + 23
+        try {
+            if (receivedData.previewVideos.length) {
+                if (animated) {
+                    if (value < -298) translateY.value = withSpring((((screenHeight - 200) - (value + 360))), { damping: 15 });
+                    else translateY.value = withSpring((((screenHeight) + value) + 39), { damping: 15 });
+                } else {
+                    if (value < -298) translateY.value = ((screenHeight) - (value + 560));
+                    else translateY.value = ((screenHeight) + value) + 39;
+                }
+            } else {
+                if (animated) translateY.value = withSpring((screenHeight + value) + 23, { damping: 15 });
+                else translateY.value = (screenHeight + value) + 23;
+            }
+        } catch (error) {
+            console.error("Error in handleTranslationYChange: ", error);
+        }
     };
-
+    
+    useEffect(() => {
+        try {
+            const data = [];
+            data.push(...receivedData.displayAssets);
+            if (receivedData.images.icon) data.push({
+                url: receivedData.images.icon,
+                displayAsset: receivedData.name + "_icon"
+            });
+    
+            setAssets(data);
+        } catch (error) {
+            console.error("Error in useEffect (data setup): ", error);
+        }
+    }, []);
+    
+    const downloadImage = async (imageUrl) => {
+        try {
+            const downloadResumable = FileSystem.createDownloadResumable(
+                imageUrl,
+                `${FileSystem.cacheDirectory}${assets[assetsIndex].displayAsset}.png`,
+                {},
+            );
+    
+            const downloadedFile = await downloadResumable.downloadAsync();
+            await MediaLibrary.createAssetAsync(downloadedFile.uri);
+            await FileSystem.deleteAsync(downloadedFile.uri);
+            alert('Image downloaded successfully!');
+        } catch (error) {
+            console.error("Error in downloadImage: ", error);
+            alert('Failed to download image. Please try again.');
+        }
+    };
+    
+    useEffect(() => {
+        let audioPlayer;
+        async function playAudio() {
+            try {
+                audioPlayer = new Audio.Sound();
+                await audioPlayer.loadAsync({
+                    uri: receivedData.audio
+                })
+    
+                setPlayer(audioPlayer);
+                await audioPlayer.setIsMutedAsync(true);
+                setMute(true);
+                await audioPlayer.playAsync();
+            } catch (error) {
+                console.error("Error in playAudio: ", error);
+            }
+        }
+    
+        if (receivedData.audio !== null) playAudio();
+    
+        return () => {
+            if (audioPlayer) {
+                audioPlayer.stopAsync().catch(error => console.error("Error stopping audio: ", error));
+                audioPlayer.unloadAsync().catch(error => console.error("Error unloading audio: ", error));
+            }
+        };
+    }, [receivedData.audio]);
+    
     const rBottomSheetStyle = useAnimatedStyle(() => {
         return {
             height: translateY.value
         };
     });
-
+    
     function formatTimeAgo(date) {
-        const dateTime = new Date(date);
-        const currentTime = new Date();
-
-        const timeDifference = Math.abs(currentTime - dateTime);
-
-        const seconds = Math.floor(timeDifference / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) {
-            return `${days} ${t('days_ago_at')} ${formatAMPM(dateTime)}`;
-        } else if (hours > 0) {
-            return `${hours} ${t('hours_ago_at')} ${formatAMPM(dateTime)}`;
-        } else if (minutes > 0) {
-            return `${minutes} ${t('minutes_ago_at')} ${formatAMPM(dateTime)}`;
-        } else {
-            dateTime
-            return `${seconds} ${t('seconds_ago_at')} ${formatAMPM(dateTime)}`;
+        try {
+            const dateTime = new Date(date);
+            const currentTime = new Date();
+    
+            const timeDifference = Math.abs(currentTime - dateTime);
+    
+            const seconds = Math.floor(timeDifference / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+    
+            if (days > 0) {
+                return `${days} ${t('days_ago_at')} ${formatAMPM(dateTime)}`;
+            } else if (hours > 0) {
+                return `${hours} ${t('hours_ago_at')} ${formatAMPM(dateTime)}`;
+            } else if (minutes > 0) {
+                return `${minutes} ${t('minutes_ago_at')} ${formatAMPM(dateTime)}`;
+            } else {
+                return `${seconds} ${t('seconds_ago_at')} ${formatAMPM(dateTime)}`;
+            }
+        } catch (error) {
+            console.error("Error in formatTimeAgo: ", error);
+            return '';
         }
     }
-
+    
     function formatAMPM(date) {
-        let hours = date.getHours();
-        let minutes = date.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // 12-hour clock format
-        minutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero
-        const timeString = hours + ':' + minutes + ' ' + ampm;
-        return timeString;
-    }
-
-    const handleBookmarkToggle = () => {
-        setPlayerData(prevState => ({
-            ...prevState,
-            bookmarked: !prevState.bookmarked
-        }));
-    };
-
-    const renderItems = () => {
-        const rows = [];
-        const itemsPerRow = 3;
-        for (let i = 0; i < assets.length; i += itemsPerRow) {
-            const rowItems = assets.slice(i, i + itemsPerRow).map((item, index) => (
-                <RNGHTouchableOpacity onPress={() => {
-                    setAssetsIndex(index + i)
-                    setModalVisible(!modalVisible)
-                }} key={index} style={{
-                    borderRadius: 10,
-                    backgroundColor: 'rgba(1, 1, 1, 0.5)',
-                    justifyContent: 'center',
-                    marginLeft: index === 0 ? 0 : 5, // No margin for the first item in the row
-                }}>
-                    <Image
-                        source={{ uri: item.url }}
-                        style={{
-                            borderRadius: 10,
-                            width: 107,
-                            height: 107
-                        }}
-                    />
-                </RNGHTouchableOpacity>
-            ));
-            rows.push(
-                <View key={i} style={{ flexDirection: 'row', marginBottom: 5 }}>
-                    {rowItems}
-                </View>
-            );
+        try {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 12-hour clock format
+            minutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero
+            const timeString = hours + ':' + minutes + ' ' + ampm;
+            return timeString;
+        } catch (error) {
+            console.error("Error in formatAMPM: ", error);
+            return '';
         }
-        return rows;
+    }
+    
+    const handleBookmarkToggle = () => {
+
+        try {
+            setPlayerData(prevState => ({
+                ...prevState,
+                bookmarked: !prevState.bookmarked
+            }));
+        } catch (error) {
+            console.error("Error in handleBookmarkToggle: ", error);
+        }
     };
+    
+    const renderItems = () => {
+        try {
+            const rows = [];
+            const itemsPerRow = 3;
+            for (let i = 0; i < assets.length; i += itemsPerRow) {
+                const rowItems = assets.slice(i, i + itemsPerRow).map((item, index) => (
+                    <RNGHTouchableOpacity onPress={() => {
+                        setAssetsIndex(index + i);
+                        setModalVisible(!modalVisible);
+                    }} key={index} style={{
+                        borderRadius: 10,
+                        backgroundColor: 'rgba(1, 1, 1, 0.5)',
+                        justifyContent: 'center',
+                        marginLeft: index === 0 ? 0 : 5, // No margin for the first item in the row
+                    }}>
+                        <Image
+                            source={{ uri: item.url }}
+                            style={{
+                                borderRadius: 10,
+                                width: 107,
+                                height: 107
+                            }}
+                        />
+                    </RNGHTouchableOpacity>
+                ));
+                rows.push(
+                    <View key={i} style={{ flexDirection: 'row', marginBottom: 5 }}>
+                        {rowItems}
+                    </View>
+                );
+            }
+            return rows;
+        } catch (error) {
+            console.error("Error in renderItems: ", error);
+            return null;
+        }
+    };    
 
     return (
         <View style={styles.container}>
@@ -245,33 +287,7 @@ export default function Details({ navigation }) {
                                     height: '100%'
                                 }}
                             />
-                            {
-                                receivedData.type.id === "emote" ? (
-                                    <View style={{
-                                        position: 'absolute',
-                                        right: 5,
-                                        bottom: 30,
-                                    }}>
-                                        <RNGHTouchableOpacity onPress={() => setMute(!mute)} style={{
-                                            width: 40,
-                                            height: 40,
-                                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                                            borderRadius: 20,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            marginRight: 5, // Add margin between buttons for spacing
-                                        }}>
-                                            {
-                                                mute ? (
-                                                    <Octicons name='mute' size={20} color={"white"} />
-                                                ) : (
-                                                    <Octicons name='unmute' size={20} color={"white"} />
-                                                )
-                                            }
-                                        </RNGHTouchableOpacity>
-                                    </View>
-                                ) : null
-                            }
+                            
                         </Animated.View>
                     ) : (
                         <Animated.View style={[{
@@ -351,7 +367,7 @@ export default function Details({ navigation }) {
                 }
             </View>
 
-            <BottomSheet ref={bottomSheetRef} type='details' onTranslationYChange={handleTranslationYChange} background={colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors}>
+            <BottomSheet ref={bottomSheetRef} type='details' onTranslationYChange={handleTranslationYChange} background={colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors} audio={{ function: receivedData.type.id === "emote" ? setMute : null, value: receivedData.type.id === "emote" ? mute : null }}>
                 <View style={{
                     marginTop: 20,
                     marginHorizontal: 20,
@@ -402,7 +418,7 @@ export default function Details({ navigation }) {
                                 fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black"
                             }}>{receivedData.name.toUpperCase()}</Text>
 
-                            <RNGHTouchableOpacity onPress={handleBookmarkToggle} style={{
+                            <RNGHTouchableOpacity onPress={() => toggleBookmark(receivedData.id)} style={{
                                 height: 40,
                                 width: 40,
                                 elevation: 10,
@@ -412,7 +428,7 @@ export default function Details({ navigation }) {
                                 alignItems: 'center',
                             }}>
                                 {
-                                    playerData.bookmarked ? (
+                                    isBookmarked ? (
                                         <Octicons name="bookmark-slash" size={20} color={"white"} />
                                     ) : (
                                         <Octicons name="bookmark" size={20} color={"white"} />
