@@ -512,12 +512,21 @@ export default function Home({ navigation }) {
             "endDate": "2024-05-24 05:59:59+00:00",
             "path": require('../../assets/seasons/c5s2.png')
         },
+        {
+            "season": 30,
+            "chapter": 5,
+            "seasonInChapter": 3,
+            "displayName": t("s30"),
+            "startDate": "2024-05-24 06:00:00+00:00",
+            "endDate": "2024-08-16 05:59:59+00:00",
+            "path": require('../../assets/seasons/c5s3.png')
+        },
     ]
 
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}list_cached_data.json`;
     const CACHE_EXPIRATION_TIME = 15 * 60 * 1000;
 
-    const [erroredWhileFetchingData, setErroredWhileFetchingData] = useState(true);
+    const [erroredWhileFetchingData, setErroredWhileFetchingData] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [selected, setSelected] = useState(0);
     const [cosmetics, setCosmetics] = useState([])
@@ -566,15 +575,23 @@ export default function Home({ navigation }) {
         }
 
         if (filterQuery.source.length > 0) {
-            const filterTags = filterQuery.source.flatMap(tag => tag.split(","));
+            const filterTags = filterQuery.source.flatMap(tag => tag.split(",").map(t => t.trim().toLowerCase()));
+            
             filteredCosmetics = filteredCosmetics.filter(item => {
+                const hasGameplayTag = (filterTag) => item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag));
+        
                 return filterTags.some(filterTag => {
-                    if (filterTag === "Cosmetics.Source.Season") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.battlepass !== null
-                    else if (filterTag === "Cosmetics.Source.ItemShop") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.shopHistory !== null
-                    else return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase()))
-                })
+                    if (filterTag === "cosmetics.source.season") {
+                        return hasGameplayTag(filterTag) || item.battlepass !== null;
+                    } else if (filterTag === "cosmetics.source.itemshop") {
+                        return hasGameplayTag(filterTag) || item.shopHistory !== null;
+                    } else {
+                        return hasGameplayTag(filterTag);
+                    }
+                });
             });
         }
+        
 
         if (filterQuery.tags.length > 0) {
             const tagSet = new Set(filterQuery.tags.flatMap(tag => tag.split(",")).map(tag => tag.trim().toLowerCase()));
@@ -582,8 +599,11 @@ export default function Home({ navigation }) {
         }
 
         if (filterQuery.chapters.length > 0) {
-            const chapterSet = new Set(filterQuery.chapters);
-            filteredCosmetics = filteredCosmetics.filter(item => item.introduction && chapterSet.has(item.introduction.text));
+            const chapters = filterQuery.chapters; // Cache the chapters array
+            filteredCosmetics = filteredCosmetics.filter(item => {
+                if (!item.introduction) return false; // Skip items with no introduction
+                return chapters.some(chapter => item.introduction.text.includes(chapter));
+            });
         }
 
         if (searchText) {

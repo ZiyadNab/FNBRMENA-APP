@@ -300,6 +300,9 @@ export default function App() {
   }, [])
 
   const [fontLoaded] = useFonts({
+    ...AntDesign.font,
+    ...Feather.font,
+    ...Ionicons.font,
     "BurbankBigCondensed-Black": require('./assets/fonts/BurbankBigCondensed-Black.ttf'),
     "BurbankSmall-Black": require('./assets/fonts/BurbankSmall-Black.otf'),
     "Lalezar-Regular": require('./assets/fonts/Lalezar-Regular.ttf'),
