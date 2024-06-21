@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
     StyleSheet, Text, View, TextInput, FlatList, ActivityIndicator,
-    RefreshControl, TouchableOpacity, I18nManager, res
+    RefreshControl, TouchableOpacity, I18nManager, Modal, Animated, TouchableWithoutFeedback
 } from 'react-native';
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -517,6 +517,7 @@ export default function Home({ navigation }) {
     const CACHE_FILE_URI = `${FileSystem.documentDirectory}list_cached_data.json`;
     const CACHE_EXPIRATION_TIME = 15 * 60 * 1000;
 
+    const [erroredWhileFetchingData, setErroredWhileFetchingData] = useState(true);
     const [searchText, setSearchText] = useState('');
     const [selected, setSelected] = useState(0);
     const [cosmetics, setCosmetics] = useState([])
@@ -546,8 +547,8 @@ export default function Home({ navigation }) {
     }, []);
 
     const filterCosmetics = useCallback(() => {
-
         let filteredCosmetics = cosmetics;
+
         if (selected === 0) {
             filteredCosmetics = filteredCosmetics.filter(item => item.name);
         }
@@ -557,18 +558,16 @@ export default function Home({ navigation }) {
         }
 
         if (filterQuery.rarity.length > 0) {
+            const raritySet = new Set(filterQuery.rarity.map(r => r.toLowerCase()));
             filteredCosmetics = filteredCosmetics.filter(item => {
-                return filterQuery.rarity.some(rarity => {
-                    if (item.series === null) {
-                        return item.rarity.id.toLowerCase().includes(rarity.toLowerCase());
-                    } else return item.series.id.toLowerCase().includes(rarity.toLowerCase());
-                });
+                const itemRarity = item.series ? item.series.id.toLowerCase() : item.rarity.id.toLowerCase();
+                return raritySet.has(itemRarity);
             });
         }
 
         if (filterQuery.source.length > 0) {
+            const filterTags = filterQuery.source.flatMap(tag => tag.split(","));
             filteredCosmetics = filteredCosmetics.filter(item => {
-                const filterTags = filterQuery.source.flatMap(tag => tag.split(","));
                 return filterTags.some(filterTag => {
                     if (filterTag === "Cosmetics.Source.Season") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.battlepass !== null
                     else if (filterTag === "Cosmetics.Source.ItemShop") return item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase())) || item.shopHistory !== null
@@ -578,21 +577,13 @@ export default function Home({ navigation }) {
         }
 
         if (filterQuery.tags.length > 0) {
-            filteredCosmetics = filteredCosmetics.filter(item => {
-                const filterTags = filterQuery.tags.flatMap(tag => tag.split(","));
-                return filterTags.some(filterTag =>
-                    item.gameplayTags.some(tag => tag.toLowerCase().includes(filterTag.trim().toLowerCase()))
-                );
-            });
+            const tagSet = new Set(filterQuery.tags.flatMap(tag => tag.split(",")).map(tag => tag.trim().toLowerCase()));
+            filteredCosmetics = filteredCosmetics.filter(item => item.gameplayTags.some(tag => tagSet.has(tag.toLowerCase())));
         }
 
         if (filterQuery.chapters.length > 0) {
-            filteredCosmetics = filteredCosmetics.filter(item => item.introduction !== null)
-            filteredCosmetics = filteredCosmetics.filter(item => {
-                return filterQuery.chapters.some(chapter => {
-                    return item.introduction.text.includes(chapter)
-                });
-            });
+            const chapterSet = new Set(filterQuery.chapters);
+            filteredCosmetics = filteredCosmetics.filter(item => item.introduction && chapterSet.has(item.introduction.text));
         }
 
         if (searchText) {
@@ -626,13 +617,7 @@ export default function Home({ navigation }) {
         }
 
         if (filterQuery.sortZTOA) {
-            filteredCosmetics.sort((a, b) => {
-                const nameA = a.name.toUpperCase();
-                const nameB = b.name.toUpperCase();
-                if (nameA > nameB) return -1;
-                if (nameA < nameB) return 1;
-                return 0;
-            });
+            filteredCosmetics.sort((a, b) => b.name.localeCompare(a.name));
         }
 
         setSearchedCosmetics(filteredCosmetics);
@@ -649,6 +634,7 @@ export default function Home({ navigation }) {
 
     const fetchData = useCallback(async (forceRefresh = false) => {
         try {
+            setErroredWhileFetchingData(false)
             setLoading(true);
             let cachedData = null;
             const fileInfo = await FileSystem.getInfoAsync(CACHE_FILE_URI);
@@ -681,6 +667,7 @@ export default function Home({ navigation }) {
             setCosmetics(list);
         } catch (error) {
             console.error('Error fetching data:', error);
+            setErroredWhileFetchingData(true)
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -691,7 +678,6 @@ export default function Home({ navigation }) {
         setRefreshing(true);
         await fetchData(true);
     }, [fetchData]);
-
 
     const getRarityPath = useCallback((rarity) => {
         const rarityLower = rarity.toLowerCase();
@@ -864,70 +850,8 @@ export default function Home({ navigation }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginTop: 10,
+
             }}>
-                {/* <View style={{
-                    marginTop: 40,
-                    flexDirection: 'row',
-                    width: '92%',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 15
-                }}>
-
-                    <TouchableOpacity style={{
-                        flexDirection: 'row',
-                        alignItems: "center"
-                    }}>
-
-                        <Text style={{
-                            fontSize: 25,
-                            color: 'white',
-                            fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black"
-                        }}>{t("cosmetics").toUpperCase()}</Text>
-
-                    </TouchableOpacity>
-
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}>
-
-                        <View style={{
-                            flexDirection: 'row',
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            borderTopLeftRadius: 15,
-                            borderBottomLeftRadius: 15,
-                            borderTopRightRadius: 15,
-                            borderBottomRightRadius: 15,
-                            alignItems: 'center',
-                            paddingLeft: 7,
-                            justifyContent: 'center',
-                        }}>
-
-                            <Image source={require('../../assets/cosmetics/others/vbucks.png')} style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                marginRight: 3
-                            }} />
-
-                            <Text style={{
-                                color: 'white',
-                                fontFamily: 'BurbankSmall-Black',
-                                fontSize: 16,
-                                marginRight: 5
-                            }}>13,850</Text>
-
-                            <Image source={{ uri: 'https://cdn2.unrealengine.com/fortnite-brite-raider-icon-200x200-d2cb95034d11.png' }} style={{
-                                width: 30,
-                                height: 30,
-                                borderRadius: 15,
-                            }} />
-                        </View>
-                    </View>
-
-                </View> */}
 
                 <View style={{
                     width: '91%',
@@ -987,8 +911,6 @@ export default function Home({ navigation }) {
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        height: 40,
-                        marginBottom: 20
                     }}>
                         {cosmeticTypes.map((type, index) => (
 
@@ -1004,11 +926,12 @@ export default function Home({ navigation }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     paddingHorizontal: 15,
+                                    paddingVertical: 10,
                                     backgroundColor: '#191919',
                                     borderRadius: 5,
                                 }}
                             >
-                                <Image source={getImagePath(type.id)} style={{ width: 25, height: 25, tintColor: selected === index ? colors.app.secondray : 'white', marginRight: 5 }} />
+                                <Image source={getImagePath(type.id)} style={{ width: 20, height: 20, tintColor: selected === index ? colors.app.secondray : 'white', marginRight: 5 }} />
                                 <Text style={{
                                     color: selected === index ? colors.app.secondray : 'white',
                                     fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
@@ -1019,6 +942,7 @@ export default function Home({ navigation }) {
                 </ScrollView>
 
                 <FlatList
+                    style={{ marginTop: 5 }}
                     showsVerticalScrollIndicator={false}
                     data={loading ? [] : searchedCosmetics}
                     renderItem={({ item }) => <RenderImage item={item} navigation={navigation} bottomSheetRef={bottomSheetRef} />}
@@ -1030,12 +954,58 @@ export default function Home({ navigation }) {
                     updateCellsBatchingPeriod={5000}
                     initialNumToRender={50}
                     windowSize={15}
-                    ListFooterComponent={() => { return loading ? <ActivityIndicator size="large" color="#1473FC" /> : null }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} style={{ marginTop: 5 }} />
                     }
                 />
-            </View>
+
+                {
+                    erroredWhileFetchingData ? (
+                        <View style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                        }}>
+                            <View style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'absolute',
+                                top: -475
+                            }}>
+                                <Image source={require('../../assets/error.png')} style={{ width: 260, height: 150 }} />
+
+                                <TouchableOpacity onPress={fetchData} style={{
+                                    backgroundColor: '#1573FE',
+                                    width: '80%',
+                                    borderRadius: 20,
+                                    padding: 15,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    top: -30
+                                }}>
+                                    <Text style={{
+                                        fontFamily: 'GeneralSans-Variable',
+                                        color: 'white'
+                                    }}>TRY AGAIN</Text>
+                                </TouchableOpacity>
+
+                            </View>
+
+                            <Image source={require('../../assets/llama.png')} style={{ width: 200, height: 210, bottom: 0, right: 0, position: 'absolute' }} />
+                        </View>
+                    ) : loading ? (
+                        <ActivityIndicator style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute'
+                        }} size="large" color="#1473FC" />
+                    ) : null
+                }
+
+
+
+
+            </View >
 
             <Portal>
                 <BottomSheet ref={bottomSheetRef} type='filter' background={{ color: "#191919" }}>
@@ -1511,7 +1481,7 @@ export default function Home({ navigation }) {
                 </BottomSheet>
             </Portal>
 
-        </LinearGradient>
+        </LinearGradient >
 
     );
 }

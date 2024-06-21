@@ -22,7 +22,6 @@ import MapScreenUI from './src/main/map'
 import getStartedScreen from './src/loginflow/get_started'
 import LoginScreen from './src/loginflow/login'
 import CreateAccountScreen from './src/loginflow/create'
-import { BookmarkProvider } from './src/helpers/bookmark';
 
 function getWidth() {
   let width = Dimensions.get("window").width
@@ -32,6 +31,7 @@ function getWidth() {
 
 function HomeScreen() {
   const { t } = useTranslation()
+  
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -58,7 +58,8 @@ function HomeScreen() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarShowLabel: false,
-          tabBarStyle: [styles.tabBar, { opacity: isKeyboardOpen ? 0 : 1 }],
+          tabBarStyle: styles.tabBar,
+          tabBarHideOnKeyboard: true,
           headerStyle: {
             backgroundColor: 'black',
           },
@@ -249,7 +250,7 @@ function HomeScreen() {
         height: 3,
         backgroundColor: "#009BFF",
         position: 'absolute',
-        bottom: Platform.OS === "ios" ? 20 : 5,
+        bottom: Platform.OS === "ios" ? 25 : 10,
         left: 64,
         borderRadius: 5,
         transform: [{
@@ -311,31 +312,29 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
       <PortalProvider>
-        <BookmarkProvider>
-          <NavigationContainer theme={theme}>
-            <HomeScreenStack.Navigator screenOptions={{
-              headerShown: false
-            }}>
+        <NavigationContainer theme={theme}>
+          <HomeScreenStack.Navigator screenOptions={{
+            headerShown: false
+          }}>
 
-              <HomeScreenStack.Screen
-                name="Cosmetics"
-                component={HomeScreen}
+            <HomeScreenStack.Screen
+              name="Cosmetics"
+              component={HomeScreen}
 
-              />
+            />
 
-              <HomeScreenStack.Screen
-                name="DetailsScreen"
-                component={DetailsScreenUI}
-              />
+            <HomeScreenStack.Screen
+              name="DetailsScreen"
+              component={DetailsScreenUI}
+            />
 
-              <HomeScreenStack.Screen
-                name="QuestsBundleScreen"
-                component={QuestsBundleScreenUI}
-              />
+            <HomeScreenStack.Screen
+              name="QuestsBundleScreen"
+              component={QuestsBundleScreenUI}
+            />
 
-            </HomeScreenStack.Navigator>
-          </NavigationContainer>
-        </BookmarkProvider>
+          </HomeScreenStack.Navigator>
+        </NavigationContainer>
       </PortalProvider>
     </GestureHandlerRootView>
 
@@ -385,7 +384,7 @@ const styles = StyleSheet.create({
     borderColor: '#191919',
     backgroundColor: '#191919',
     padding: Platform.OS === "ios" ? 15 : 0,
-    height: Platform.OS === "ios" ? 90 : 70,
+    height: Platform.OS === "ios" ? 100 : 80,
     paddingHorizontal: 40,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Modal } from 'react-native';
+import { Image } from 'expo-image';
 import { Octicons, Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { Video, ResizeMode, Audio } from 'expo-av';
@@ -18,7 +19,6 @@ import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-nati
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useTranslation } from 'react-i18next';
-import { useBookmarks } from '../helpers/bookmark';
 import i18next from '../../localization/i18n.js'
 
 export default function Details({ navigation }) {
@@ -36,8 +36,7 @@ export default function Details({ navigation }) {
     const [styleIndex, setStyleIndex] = useState(0)
     const [assetsIndex, setAssetsIndex] = useState(0)
     const [assets, setAssets] = useState([])
-    const { bookmarks, toggleBookmark } = useBookmarks();
-    const isBookmarked = bookmarks.includes(receivedData.id);
+    const [isBookmarked, toggleBookmark] = useState(false)
 
     const handleTranslationYChange = (value, animated) => {
         try {
@@ -57,7 +56,7 @@ export default function Details({ navigation }) {
             console.error("Error in handleTranslationYChange: ", error);
         }
     };
-    
+
     useEffect(() => {
         try {
             const data = [];
@@ -66,13 +65,13 @@ export default function Details({ navigation }) {
                 url: receivedData.images.icon,
                 displayAsset: receivedData.name + "_icon"
             });
-    
+
             setAssets(data);
         } catch (error) {
             console.error("Error in useEffect (data setup): ", error);
         }
     }, []);
-    
+
     const downloadImage = async (imageUrl) => {
         try {
             const downloadResumable = FileSystem.createDownloadResumable(
@@ -80,7 +79,7 @@ export default function Details({ navigation }) {
                 `${FileSystem.cacheDirectory}${assets[assetsIndex].displayAsset}.png`,
                 {},
             );
-    
+
             const downloadedFile = await downloadResumable.downloadAsync();
             await MediaLibrary.createAssetAsync(downloadedFile.uri);
             await FileSystem.deleteAsync(downloadedFile.uri);
@@ -90,7 +89,7 @@ export default function Details({ navigation }) {
             alert('Failed to download image. Please try again.');
         }
     };
-    
+
     useEffect(() => {
         let audioPlayer;
         async function playAudio() {
@@ -99,7 +98,7 @@ export default function Details({ navigation }) {
                 await audioPlayer.loadAsync({
                     uri: receivedData.audio
                 })
-    
+
                 setPlayer(audioPlayer);
                 await audioPlayer.setIsMutedAsync(true);
                 setMute(true);
@@ -108,9 +107,9 @@ export default function Details({ navigation }) {
                 console.error("Error in playAudio: ", error);
             }
         }
-    
+
         if (receivedData.audio !== null) playAudio();
-    
+
         return () => {
             if (audioPlayer) {
                 audioPlayer.stopAsync().catch(error => console.error("Error stopping audio: ", error));
@@ -118,25 +117,25 @@ export default function Details({ navigation }) {
             }
         };
     }, [receivedData.audio]);
-    
+
     const rBottomSheetStyle = useAnimatedStyle(() => {
         return {
             height: translateY.value
         };
     });
-    
+
     function formatTimeAgo(date) {
         try {
             const dateTime = new Date(date);
             const currentTime = new Date();
-    
+
             const timeDifference = Math.abs(currentTime - dateTime);
-    
+
             const seconds = Math.floor(timeDifference / 1000);
             const minutes = Math.floor(seconds / 60);
             const hours = Math.floor(minutes / 60);
             const days = Math.floor(hours / 24);
-    
+
             if (days > 0) {
                 return `${days} ${t('days_ago_at')} ${formatAMPM(dateTime)}`;
             } else if (hours > 0) {
@@ -151,7 +150,7 @@ export default function Details({ navigation }) {
             return '';
         }
     }
-    
+
     function formatAMPM(date) {
         try {
             let hours = date.getHours();
@@ -167,19 +166,7 @@ export default function Details({ navigation }) {
             return '';
         }
     }
-    
-    const handleBookmarkToggle = () => {
 
-        try {
-            setPlayerData(prevState => ({
-                ...prevState,
-                bookmarked: !prevState.bookmarked
-            }));
-        } catch (error) {
-            console.error("Error in handleBookmarkToggle: ", error);
-        }
-    };
-    
     const renderItems = () => {
         try {
             const rows = [];
@@ -216,7 +203,7 @@ export default function Details({ navigation }) {
             console.error("Error in renderItems: ", error);
             return null;
         }
-    };    
+    };
 
     return (
         <View style={styles.container}>
@@ -287,7 +274,7 @@ export default function Details({ navigation }) {
                                     height: '100%'
                                 }}
                             />
-                            
+
                         </Animated.View>
                     ) : (
                         <Animated.View style={[{
@@ -418,7 +405,7 @@ export default function Details({ navigation }) {
                                 fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankBigCondensed-Black"
                             }}>{receivedData.name.toUpperCase()}</Text>
 
-                            <RNGHTouchableOpacity onPress={() => toggleBookmark(receivedData.id)} style={{
+                            <RNGHTouchableOpacity onPress={() => toggleBookmark(!isBookmarked)} style={{
                                 height: 40,
                                 width: 40,
                                 elevation: 10,
