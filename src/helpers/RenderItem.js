@@ -57,7 +57,6 @@ const RenderItem = ({ item, navigation, bottomSheetRef }) => {
             <Image
                 source={getRarityPath(item.series ? item.series.id : item.rarity.id)}
                 style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-                cachePolicy='disk'
             />
             <Image
                 source={{ uri: item.images.icon ? item.images.icon : item.displayAssets.length ? item.displayAssets[0].url : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }}

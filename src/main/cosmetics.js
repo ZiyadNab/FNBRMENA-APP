@@ -4,7 +4,7 @@ import {
     StyleSheet, Text, View, TextInput, FlatList, ActivityIndicator,
     RefreshControl, TouchableOpacity, I18nManager
 } from 'react-native';
-import { Octicons, AntDesign } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios'
 import RenderImage from '../helpers/RenderItem'
@@ -645,12 +645,10 @@ export default function Home({ navigation }) {
 
                 if (!forceRefresh && (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME)) {
                     cachedData = await FileSystem.readAsStringAsync(CACHE_FILE_URI);
-                    setSearchText("cache")
                 }
             }
 
             if (!cachedData || i18next.language !== cachedLanguage || forceRefresh) {
-                setSearchText("api")
                 const response = await axios(`https://fortniteapi.io/v2/items/list?lang=${i18next.language}&fields=name,rarity,series,description,id,price,reactive,type,added,builtInEmote,previewVideos,copyrightedAudio,apiTags,upcoming,releaseDate,lastAppearance,images,juno,video,audio,gameplayTags,apiTags,battlepass,set,introduction,shopHistory,styles,grants,grantedBy,displayAssets`, {
                     headers: {
                         'Authorization': 'd4ce1562-839ff66b-3946ccb6-438eb9cf'
