@@ -31,7 +31,7 @@ function getWidth() {
 
 function HomeScreen() {
   const { t } = useTranslation()
-  
+
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState, useEffect } from 'react'
-import { TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { TouchableOpacity, StyleSheet, Linking, Share } from 'react-native';
 import { Image } from 'expo-image';
 import colors from '../../colors.json';
 
@@ -52,7 +52,7 @@ const RenderItem = ({ item, navigation, bottomSheetRef }) => {
     }
 
     return (
-        <TouchableOpacity onLongPress={(event) => handleLongPress(item, event)} onPress={itemClicked} style={{ width: 109, height: 109, margin: 5, borderRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.cosmetics[item.series ? item.series.id : item.rarity.id].colors.Color1 }}>
+        <TouchableOpacity onPress={itemClicked} style={{ width: 109, height: 109, margin: 5, borderRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.cosmetics[item.series ? item.series.id : item.rarity.id].colors.Color1 }}>
 
             <Image
                 source={getRarityPath(item.series ? item.series.id : item.rarity.id)}
