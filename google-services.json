@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "763583153004",
+    "project_id": "fnbrmenaapp",
+    "storage_bucket": "fnbrmenaapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763583153004:android:1bde9a6f3c02d6c833e949",
+        "android_client_info": {
+          "package_name": "com.ziyadnabil.fnbrmena"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDytN9LBHCPmUsD8bOZnY1zEY-_7mLwDNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -251,8 +251,9 @@
   },
   "app": {
     "background": "#000",
-    "buttons": "#0000FF",
+    "primary": "#191919",
     "secondray": "#009BFF",
-    "filter": "#000C66"
+    "top": "#000",
+    "bottom": "#191919"
   }
 }

@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
     StyleSheet, Text, View, TextInput, FlatList, ActivityIndicator,
-    RefreshControl, TouchableOpacity, I18nManager
+    RefreshControl, TouchableOpacity
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -13,13 +13,17 @@ import BottomSheet from '../helpers/BottomSheet';
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { Portal } from '@gorhom/portal'
 import colors from '../../colors.json'
+import useColorStore from '../helpers/colorsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import i18next from '../../localization/i18n.js'
+import Color from 'color'
 
 export default function Home({ navigation }) {
     const { t } = useTranslation()
-    let cachedLanguage = i18next.language;
+    const secondrayColor = useColorStore(res => res.jsonData.app.secondray);
+    const backgroundColorLR = useColorStore(res => res.jsonData.app.background);
+    const primaryColorLR = useColorStore(res => res.jsonData.app.primary);
 
     const cosmeticTypes = [
         {
@@ -656,7 +660,8 @@ export default function Home({ navigation }) {
         try {
             setErroredWhileFetchingData(false)
             setLoading(true);
-            let cachedData = null;
+            let cachedData = null
+            let cachedLanguage = null
             const fileInfo = await FileSystem.getInfoAsync(CACHE_FILE_URI);
 
             if (fileInfo.exists) {
@@ -665,6 +670,8 @@ export default function Home({ navigation }) {
 
                 if (!forceRefresh && (currentTime - modificationTimeMilliseconds < CACHE_EXPIRATION_TIME)) {
                     cachedData = await FileSystem.readAsStringAsync(CACHE_FILE_URI);
+                    cachedLanguage = JSON.parse(cachedData).cachedLanguage
+                    
                 }
             }
 
@@ -676,13 +683,15 @@ export default function Home({ navigation }) {
                 });
 
                 const jsonData = await response.data;
-                const newData = JSON.stringify(jsonData.items);
+                const newData = JSON.stringify({
+                    cachedLanguage: i18next.language,
+                    items: jsonData.items
+                });
                 await FileSystem.writeAsStringAsync(CACHE_FILE_URI, newData, { encoding: FileSystem.EncodingType.UTF8 });
                 cachedData = newData;
-                cachedLanguage = i18next.language;
             }
 
-            const removeUnWantedItems = JSON.parse(cachedData).filter(item => item.name !== "");
+            const removeUnWantedItems = JSON.parse(cachedData).items.filter(item => item.name !== "");
             const list = removeUnWantedItems.sort((a, b) => new Date(a.added.date) - new Date(b.added.date));
             setCosmetics(list);
         } catch (error) {
@@ -858,14 +867,8 @@ export default function Home({ navigation }) {
         }
     }
 
-    function changeLng() {
-
-        i18next.changeLanguage(i18next.language === "ar" ? 'en' : 'ar')
-        I18nManager.forceRTL(i18next.language === "ar" ? true : false)
-    }
-
     return (
-        <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
+        <LinearGradient colors={[backgroundColorLR, backgroundColorLR]} style={styles.container}>
             <View style={{
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -876,7 +879,7 @@ export default function Home({ navigation }) {
                 <View style={{
                     width: '91%',
                     height: 40,
-                    backgroundColor: '#191919',
+                    backgroundColor: primaryColorLR,
                     borderRadius: 5,
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -905,7 +908,7 @@ export default function Home({ navigation }) {
                     }} style={{
                         height: 40,
                         padding: 10,
-                        backgroundColor: '#191919',
+                        backgroundColor: primaryColorLR,
                         borderRadius: 5,
                     }}>
                         <AntDesign name="filter" color={filterQuery.rarity.length > 0 || filterQuery.source.length > 0 || filterQuery.tags.length > 0 || filterQuery.chapters.length > 0 ? "red" : "white"} size={20} />
@@ -947,14 +950,15 @@ export default function Home({ navigation }) {
                                     justifyContent: 'center',
                                     paddingHorizontal: 15,
                                     paddingVertical: 10,
-                                    backgroundColor: '#191919',
+                                    backgroundColor: selected === index ? Color(secondrayColor).alpha(0.20).rgb().string() : primaryColorLR,
                                     borderRadius: 5,
                                 }}
                             >
-                                <Image source={getImagePath(type.id)} style={{ width: 20, height: 20, tintColor: selected === index ? colors.app.secondray : 'white', marginRight: 5 }} />
+                                <Image source={getImagePath(type.id)} style={{ width: 20, height: 20, tintColor: selected === index ? secondrayColor : 'white', marginRight: 5 }} />
                                 <Text style={{
-                                    color: selected === index ? colors.app.secondray : 'white',
+                                    color: selected === index ? secondrayColor : 'white',
                                     fontFamily: i18next.language === "ar" ? "Lalezar-Regular" : "BurbankSmall-Black",
+                                    textAlign: "cente "
                                 }}>{type.name.toUpperCase()}</Text>
                             </TouchableOpacity>
                         ))}
@@ -963,6 +967,7 @@ export default function Home({ navigation }) {
 
                 <FlatList
                     style={{ marginTop: 5 }}
+                    // contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
                     showsVerticalScrollIndicator={false}
                     data={loading || erroredWhileFetchingData ? [] : searchedCosmetics}
                     renderItem={({ item }) => <RenderImage item={item} navigation={navigation} bottomSheetRef={bottomSheetRef} />}
@@ -1022,9 +1027,6 @@ export default function Home({ navigation }) {
                     ) : null
                 }
 
-
-
-
             </View >
 
             <Portal>
@@ -1052,38 +1054,6 @@ export default function Home({ navigation }) {
                                 }}>
                                     {
                                         cosmeticRarities.map((item, index) => (
-                                            // <View key={index}>
-                                            //     <RNGHTouchableOpacity
-                                            //         style={{
-                                            //             marginRight: 5,
-                                            //             height: 60,
-                                            //             borderRadius: 10,
-                                            //             padding: 5,
-                                            //             backgroundColor: "#222128",
-                                            //             alignItems: 'center',
-                                            //             flexDirection: 'row',
-                                            //             justifyContent: 'center',
-                                            //         }}
-                                            //         onPress={() => handleRarityButtonClick(item)} // Handle button click
-                                            //     >
-                                            //         <Image
-                                            //             style={{ marginRight: 5, width: 50, height: 50, borderWidth: 2, borderRadius: 10, borderColor: filterQuery.rarity.find(rarity => rarity.rarityId === item.id) ? colors.cosmetics[item.id].colors.Color2 : colors.cosmetics[item.id].colors.Color1 }} // Added style for the image
-                                            //             source={getRarityPath(item.id)}
-                                            //         />
-                                            //         <Text
-                                            //             style={{
-                                            //                 color: colors.cosmetics[item.id].colors.Color1,
-                                            //                 textAlign: 'center',
-                                            //                 marginRight: 20,
-                                            //                 fontSize: 17,
-                                            //                 fontFamily: "BurbankSmall-Black"
-                                            //             }}
-                                            //         >
-                                            //             {item.name.toUpperCase()}
-                                            //         </Text>
-                                            //     </RNGHTouchableOpacity>
-                                            // </View>
-
                                             <View key={index}>
                                                 <RNGHTouchableOpacity
                                                     style={{
@@ -1144,7 +1114,7 @@ export default function Home({ navigation }) {
                                                         flexDirection: 'row',
                                                         justifyContent: 'center',
                                                         borderWidth: filterQuery.source.find(source => source === item.id) ? 2 : null,
-                                                        borderColor: filterQuery.source.find(source => source === item.id) ? colors.app.buttons : null
+                                                        borderColor: filterQuery.source.find(source => source === item.id) ? secondrayColor : null
                                                     }}
                                                     onPress={() => handleSourceButtonClick(item.id)} // Handle button click
                                                 >
@@ -1228,7 +1198,7 @@ export default function Home({ navigation }) {
                                                         flexDirection: 'row',
                                                         justifyContent: 'center',
                                                         borderWidth: filterQuery.tags.find(source => source === item.id) ? 2 : null,
-                                                        borderColor: filterQuery.tags.find(source => source === item.id) ? colors.app.buttons : null
+                                                        borderColor: filterQuery.tags.find(source => source === item.id) ? secondrayColor : null
                                                     }}
                                                     onPress={() => handleTagsButtonClick(item.id)}
                                                 >
@@ -1297,7 +1267,7 @@ export default function Home({ navigation }) {
                                                         flexDirection: 'row',
                                                         justifyContent: 'center',
                                                         borderWidth: filterQuery.chapters.find(cs => cs === chapter.displayName) ? 2 : null,
-                                                        borderColor: filterQuery.chapters.find(cs => cs === chapter.displayName) ? colors.app.buttons : null,
+                                                        borderColor: filterQuery.chapters.find(cs => cs === chapter.displayName) ? secondrayColor : null,
                                                     }}
                                                     onPress={() => handleChaptersButtonClick(chapter.displayName)}
                                                 >
@@ -1359,7 +1329,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortNewestFirst ? 2 : null,
-                                            borderColor: filterQuery.sortNewestFirst ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortNewestFirst ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1379,7 +1349,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortOldestFirst ? 2 : null,
-                                            borderColor: filterQuery.sortOldestFirst ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortOldestFirst ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1404,7 +1374,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortShopRecent ? 2 : null,
-                                            borderColor: filterQuery.sortShopRecent ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortShopRecent ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1424,7 +1394,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortShopLongest ? 2 : null,
-                                            borderColor: filterQuery.sortShopLongest ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortShopLongest ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1449,7 +1419,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortATOZ ? 2 : null,
-                                            borderColor: filterQuery.sortATOZ ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortATOZ ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1469,7 +1439,7 @@ export default function Home({ navigation }) {
                                             justifyContent: 'center',
                                             width: 170,
                                             borderWidth: filterQuery.sortZTOA ? 2 : null,
-                                            borderColor: filterQuery.sortZTOA ? colors.app.buttons : null,
+                                            borderColor: filterQuery.sortZTOA ? secondrayColor : null,
                                         }}>
                                             <Text style={{
                                                 color: 'white',
@@ -1485,7 +1455,7 @@ export default function Home({ navigation }) {
                             <RNGHTouchableOpacity onPress={resetFilters} style={{
                                 paddingHorizontal: 20,
                                 paddingVertical: 15,
-                                backgroundColor: colors.app.buttons,
+                                backgroundColor: secondrayColor,
                                 borderRadius: 10
                             }}>
                                 <Text style={{

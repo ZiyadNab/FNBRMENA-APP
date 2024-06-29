@@ -17,9 +17,18 @@ export default function Map({ navigation }) {
     return (
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
 
-            <WebView
+            {/* <WebView
                 source={require('../../test.html')}
-            />
+            /> */}
+
+            {/* <View style={{
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                <Text style={{
+                    color: 'white'
+                }}>Token: {expoPushToken?.data ?? ""}</Text>
+            </View> */}
 
         </LinearGradient>
 

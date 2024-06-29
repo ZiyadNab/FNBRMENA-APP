@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -12,10 +12,15 @@ import axios from 'axios'
 import { TouchableOpacity as RNGHTouchableOpacity, ScrollView, FlatList } from 'react-native-gesture-handler';
 import AutoScrollingScrollView from '../helpers/imageSlider';
 import Timer from '../helpers/shoptimer';
+import Color from 'color'
+import useColorStore from '../helpers/colorsContext';
 
 export default function Shop({ navigation }) {
     const { t } = useTranslation()
     let cachedLanguage = i18next.language;
+    const secondrayColor = useColorStore(res => res.jsonData.app.secondray);
+    const backgroundColorLR = useColorStore(res => res.jsonData.app.background);
+    const primaryColorLR = useColorStore(res => res.jsonData.app.primary);
 
     const types = [
         {
@@ -575,7 +580,7 @@ export default function Shop({ navigation }) {
     }, [])
 
     return (
-        <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
+        <LinearGradient colors={[backgroundColorLR, "#000"]} style={styles.container}>
             <View style={{
                 justifyContent: 'center',
                 marginTop: 20,
@@ -603,7 +608,7 @@ export default function Shop({ navigation }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     paddingHorizontal: 15,
-                                    backgroundColor: '#191919',
+                                    backgroundColor: selected === index ? Color(secondrayColor).alpha(0.20).rgb().string() : primaryColorLR,
                                     borderRadius: 5,
                                 }}
                             >

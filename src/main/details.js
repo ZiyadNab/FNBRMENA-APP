@@ -484,8 +484,8 @@ export default function Details({ navigation }) {
                                                     width: 50,
                                                     borderRadius: 5,
                                                 }}>
-                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} resizeMode='contain' />
-                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: index === styleIndex ? colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} resizeMode='contain' />
+                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%' }} source={getRarityPath(receivedData.series ? receivedData.series.id : receivedData.rarity.id)} contentFit='contain' />
+                                                    <Image style={{ position: 'absolute', borderRadius: 5, width: '100%', height: '100%', borderColor: index === styleIndex ? colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color1 : colors.cosmetics[receivedData.series ? receivedData.series.id : receivedData.rarity.id].colors.Color2, borderWidth: 3 }} source={{ uri: item.image ? item.image : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }} contentFit='contain' />
                                                 </RNGHTouchableOpacity>
                                             </View>
 
