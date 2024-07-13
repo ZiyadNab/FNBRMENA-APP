@@ -38,7 +38,6 @@ const CustomInput = ({ containerStyle, placeholder, onChangeText, errored, succe
   }, [])
 
   useEffect(() => {
-    console.log(errored)
     if (errored) inputAnimatedBorder.value = withTiming('#E84E5B');
     else if (success) inputAnimatedBorder.value = withTiming('#15FEA2');
     else if(text.length === 0) inputAnimatedBorder.value = withTiming('#373636');

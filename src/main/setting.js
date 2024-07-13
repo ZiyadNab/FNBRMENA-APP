@@ -22,7 +22,7 @@ export default function Settings({ navigation }) {
             name: t("profile"),
             icon: <MaterialIcons name="account-circle" size={30} color="white" />,
             description: t("profile_desc"),
-            screen: "appearance"
+            screen: "profile"
         },
         {
             name: t("appearance"),

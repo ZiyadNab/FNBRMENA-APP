@@ -28,7 +28,9 @@ import colors from './colors.json'
 import * as FileSystem from 'expo-file-system';
 import useColorStore from './src/helpers/colorsContext'
 import AppearanceScreenUI from './src/main/appearance'
+import ProfileScreenUI from './src/main/profile'
 import Color from 'color'
+import useAuthStore from './src/helpers/useAuthStore';
 
 function getWidth() {
     let width = Dimensions.get("window").width
@@ -400,6 +402,10 @@ function CustomDrawerContent(props) {
     const focusedRoute = state.routes[state.index];
     const focusedDescriptor = descriptors[focusedRoute.key];
     const focusedOptions = focusedDescriptor.options;
+    
+    const { user } = useAuthStore(state => ({
+        user: state.user,
+    }));
 
     const {
         drawerActiveTintColor,
@@ -456,7 +462,7 @@ function CustomDrawerContent(props) {
                                 fontFamily: "BurbankSmall-Black",
                                 color: "white",
                                 fontSize: 20,
-                            }}>FNBRMENA</Text>
+                            }}>{user.displayname}</Text>
                         </View>
                     </View>
                 </View>
@@ -535,6 +541,12 @@ function Settings() {
             />
 
             <HomeScreenStack.Screen
+                name={"profile"}
+                options={{ title: t("profile") }}
+                component={ProfileScreenUI}
+            />
+
+            <HomeScreenStack.Screen
                 name={"appearance"}
                 options={{ title: t("appearance") }}
                 component={AppearanceScreenUI}
@@ -555,8 +567,14 @@ export default function App() {
         NavigationBar.useVisibility(null)
     }
 
+    const { isAuthenticated, checkAuth } = useAuthStore(state => ({
+        isAuthenticated: state.isAuthenticated,
+        checkAuth: state.checkAuth,
+    }));
+
     useEffect(() => {
 
+        checkAuth();
 
         const saveColorsJson = async () => {
             const fileUri = FileSystem.documentDirectory + 'data.json';
@@ -601,7 +619,7 @@ export default function App() {
         },
     }
 
-    return (
+    return isAuthenticated ? (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
             <PortalProvider>
@@ -611,40 +629,39 @@ export default function App() {
             </PortalProvider>
         </GestureHandlerRootView>
 
+    ) : (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
+            <PortalProvider>
+                <NavigationContainer theme={theme}>
+                    <Stack.Navigator
+                        screenOptions={{
+                            headerShown: false
+                        }}>
+
+                        <Stack.Screen
+                            name="getStarted"
+                            component={getStartedScreen}
+
+                        />
+
+                        <Stack.Screen
+                            name="LoginScreen"
+                            component={LoginScreen}
+                            options={{ title: "Login" }}
+
+                        />
+
+                        <Stack.Screen
+                            name="CreateAccountScreen"
+                            component={CreateAccountScreen}
+
+                        />
+
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </PortalProvider>
+        </GestureHandlerRootView>
+
     )
-
-    // return (
-    //   <GestureHandlerRootView style={{ flex: 1 }}>
-    //     <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
-    //     <PortalProvider>
-    //       <NavigationContainer theme={theme}>
-    //         <HomeScreenStack.Navigator
-    //           screenOptions={{
-    //             headerShown: false,
-    //           }}>
-
-    //           <HomeScreenStack.Screen
-    //             name="getStarted"
-    //             component={getStartedScreen}
-
-    //           />
-
-    //           <HomeScreenStack.Screen
-    //             name="LoginScreen"
-    //             component={LoginScreen}
-
-    //           />
-
-    //           <HomeScreenStack.Screen
-    //             name="CreateAccountScreen"
-    //             component={CreateAccountScreen}
-
-    //           />
-
-    //         </HomeScreenStack.Navigator>
-    //       </NavigationContainer>
-    //     </PortalProvider>
-    //   </GestureHandlerRootView>
-
-    // )
 }

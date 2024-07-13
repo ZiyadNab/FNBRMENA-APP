@@ -7,13 +7,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import i18next from '../../localization/i18n.js'
 import TextInput from '../helpers/TextInput'
+import axios from 'axios'
+import Toast from 'react-native-toast-message'
+import useAuthStore from '../helpers/useAuthStore';
 
 export default function Login({ navigation }) {
 
     const { t } = useTranslation()
-    let cachedLanguage = i18next.language;
-    const route = useRoute();
-    const receivedData = route.params?.data;
 
     const [rememberMe, setRememberMe] = useState(false)
     const [email, setEmail] = useState('')
@@ -23,34 +23,80 @@ export default function Login({ navigation }) {
     const [passwordErrored, setPasswordErrored] = useState(false)
     const [passwordSuccess, setPasswordSuccess] = useState(false)
 
-    function validateInputs() {
+    // Authentication
+    const { login } = useAuthStore(state => ({
+        login: state.login,
+    }));
+
+    async function validateInputs() {
 
         // Regular expression for email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-        // Validate email using regular expression
-        console.log(emailRegex.test(email))
-        setEmailErrored(!emailRegex.test(email))
-        setPasswordErrored(password.length === 0)
 
+        // Validate email using regular expression
+        if (!emailRegex.test(email)) {
+            setEmailErrored(!emailRegex.test(email))
+            Toast.show({
+                type: 'info',
+                text1: 'Something missing!',
+                text2: 'Please fill in your email.',
+                visibilityTime: 5000,
+                autoHide: true,
+
+            })
+            return
+        }
+
+        // Validate password
+        if (!emailRegex.test(email)) {
+            setPasswordErrored(password.length === 0)
+            Toast.show({
+                type: 'info',
+                text1: 'Something missing!',
+                text2: 'Please fill in password.',
+                visibilityTime: 5000,
+                autoHide: true,
+
+            })
+            return
+        }
+
+        try {
+            await login(email.toLowerCase(), password);
+        } catch (error) {
+
+            Toast.show({
+                type: 'error',
+                text1: 'Errored',
+                text2: error,
+                visibilityTime: 5000,
+                autoHide: true,
+
+            })
+
+            // Update fields
+            setEmailErrored(true)
+            setPasswordErrored(true)
+
+        }
     }
 
     return (
         <LinearGradient colors={[colors.app.background, "#000"]} style={styles.container}>
 
-            <View style={{ justifyContent: 'center', margin: 50, width: '85%', position: "absolute" }}>
+            <View style={{ marginTop: 150, margin: 50, width: '85%', position: "absolute" }}>
 
                 {/* <Text style={{ fontSize: 50, fontWeight: 'bold', textAlign: 'left', bottom: 40, color: "white", marginTop: 50 }}>Sign in with password</Text> */}
 
                 <TextInput containerStyle={{ marginBottom: 10 }} errored={emailErrored} success={emailSuccess} keyboardType='email-address' placeholder='Email' placeholderTextColor={"white"} onChangeText={(val) => setEmail(val)} updateValidation={() => {
                     setEmailErrored(false)
                     setEmailSuccess(false)
-                }}/>
+                }} />
 
                 <TextInput containerStyle={{ marginBottom: 10 }} secureTextEntry errored={passwordErrored} success={passwordSuccess} placeholder='Password' placeholderTextColor={"white"} onChangeText={(val) => setPassword(val)} updateValidation={() => {
                     setPasswordErrored(false)
                     setPasswordSuccess(false)
-                }}/>
+                }} />
 
                 <TouchableOpacity style={{
                     alignItems: "flex-start",
@@ -91,7 +137,7 @@ export default function Login({ navigation }) {
                     </TouchableOpacity>
                 </View>
             </View>
-
+            <Toast />
         </LinearGradient>
 
     )
@@ -101,6 +147,5 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: "center"
     },
 });
