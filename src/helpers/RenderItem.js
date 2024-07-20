@@ -1,9 +1,12 @@
 import React, { memo, useCallback, useState, useEffect } from 'react'
-import { TouchableOpacity, StyleSheet, Linking, Share } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import colors from '../../colors.json';
+import useEGSStore from './useEGSStore';
 
-const RenderItem = ({ item, navigation, bottomSheetRef }) => {
+const RenderItem = ({ item, navigation, bottomSheetRef, owned }) => {
+    const accountLinked = useEGSStore(res => res.isEpicGamesAccountLinked);
+
     const getRarityPath = useCallback((rarity) => {
         const rarityLower = rarity.toLowerCase();
         switch (rarityLower) {
@@ -52,16 +55,41 @@ const RenderItem = ({ item, navigation, bottomSheetRef }) => {
     }
 
     return (
-        <TouchableOpacity onPress={itemClicked} style={{ width: 109, height: 109, margin: 5, borderRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.cosmetics[item.series ? item.series.id : item.rarity.id].colors.Color1 }}>
+        <TouchableOpacity onPress={itemClicked} style={{ width: 109, height: accountLinked ? 125 : 109, margin: 5, borderRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.cosmetics[item.series ? item.series.id : item.rarity.id].colors.Color1 }}>
 
-            <Image
-                source={getRarityPath(item.series ? item.series.id : item.rarity.id)}
-                style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-            />
-            <Image
-                source={{ uri: item.images.icon ? item.images.icon : item.displayAssets.length ? item.displayAssets[0].url : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }}
-                style={{ width: '100%', height: '100%', position: 'absolute', borderRadius: 5 }}
-            />
+            <View style={{
+                backgroundColor: owned.includes(item.id.toLowerCase()) ? "#0E4B37" : 'red',
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                borderRadius: 5
+            }}>
+                <Image
+                    source={getRarityPath(item.series ? item.series.id : item.rarity.id)}
+                    style={{ width: '100%', height: accountLinked ? '87.2%' : '100%', position: 'absolute', borderRadius: 5 }}
+                />
+                <Image
+                    source={{ uri: item.images.icon ? item.images.icon : item.displayAssets.length ? item.displayAssets[0].url : 'https://i.ibb.co/XCDwKHh/HVH5sqV.png' }}
+                    style={{ width: '100%', height: accountLinked ? '87.2%' : '100%', position: 'absolute', borderRadius: 5 }}
+                />
+                
+                {
+                    accountLinked ? (
+                        <Text style={{
+                            color: owned.includes(item.id.toLowerCase()) ? "#65D087" : "white",
+                            fontSize: 10,
+                            fontFamily: "BurbankSmall-Black",
+                            position: 'absolute',
+                            bottom: 0,
+                            width: '100%',
+                            textAlign: 'center',
+                            paddingBottom: 1
+                        }}>
+                            {owned.includes(item.id.toLowerCase()) ? "OWNED" : 'NOT OWNED'}
+                        </Text>
+                    ) : null
+                }
+            </View>
 
         </TouchableOpacity>
     );

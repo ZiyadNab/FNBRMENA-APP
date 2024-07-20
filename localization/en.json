@@ -158,5 +158,8 @@
     "select_language": "Select Language",
     "secondray_color": "Secondray Color",
     "color_appearance": "Colorization Appearance",
-    "language_appearance": "Language Appearance"
+    "language_appearance": "Language Appearance",
+
+    "owned": "owned",
+    "not_owned": "not owned"
 }

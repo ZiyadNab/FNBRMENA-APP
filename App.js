@@ -31,6 +31,8 @@ import AppearanceScreenUI from './src/main/appearance'
 import ProfileScreenUI from './src/main/profile'
 import Color from 'color'
 import useAuthStore from './src/helpers/useAuthStore';
+import EGSAccountScreen from './src/loginflow/egs'
+import useEGSStore from './src/helpers/useEGSStore';
 
 function getWidth() {
     let width = Dimensions.get("window").width
@@ -357,7 +359,7 @@ function Drawer() {
             <Drawer.Screen options={{ title: t("bookmarks").toUpperCase() }} name="bookmarks" component={NotificationsScreen} />
             <Drawer.Screen options={{ title: t("reminders").toUpperCase() }} name="reminders" component={NotificationsScreen} />
             <Drawer.Screen options={{ swipeEnabled: false, title: t("settings").toUpperCase() }} name="settings" component={Settings} />
-            <Drawer.Screen options={{ title: t("account").toUpperCase() }} name="account" component={NotificationsScreen} />
+            <Drawer.Screen options={{ title: t("account").toUpperCase() }} name="account" component={EGS} />
             <Drawer.Screen options={{ title: t("friends").toUpperCase() }} name="friends" component={NotificationsScreen} />
             <Drawer.Screen options={{ title: t("discord").toUpperCase() }} name="discord" component={NotificationsScreen} />
             <Drawer.Screen options={{ title: t("twitter").toUpperCase() }} name="twitter" component={NotificationsScreen} />
@@ -402,10 +404,10 @@ function CustomDrawerContent(props) {
     const focusedRoute = state.routes[state.index];
     const focusedDescriptor = descriptors[focusedRoute.key];
     const focusedOptions = focusedDescriptor.options;
-    
-    const { user } = useAuthStore(state => ({
-        user: state.user,
-    }));
+
+    // const { user } = useAuthStore(state => ({
+    //     user: state.user,
+    // }));
 
     const {
         drawerActiveTintColor,
@@ -462,7 +464,7 @@ function CustomDrawerContent(props) {
                                 fontFamily: "BurbankSmall-Black",
                                 color: "white",
                                 fontSize: 20,
-                            }}>{user.displayname}</Text>
+                            }}>oi</Text>
                         </View>
                     </View>
                 </View>
@@ -556,6 +558,31 @@ function Settings() {
     )
 }
 
+function EGS() {
+
+    const { t } = useTranslation()
+    const HomeScreenStack = createStackNavigator()
+    return (
+        <HomeScreenStack.Navigator screenOptions={({ route, navigation }) => ({
+            headerStyle: {
+                backgroundColor: "#000",
+            },
+            headerTitleStyle: {
+                color: "white"
+            },
+            headerTintColor: "white",
+        })}>
+
+            <HomeScreenStack.Screen
+                name={"egs_account"}
+                options={{ headerShown: false, title: t("account") }}
+                component={EGSAccountScreen}
+            />
+
+        </HomeScreenStack.Navigator>
+    )
+}
+
 export default function App() {
 
     const backgroundColor = useColorStore(res => res.jsonData.app.background);
@@ -567,14 +594,14 @@ export default function App() {
         NavigationBar.useVisibility(null)
     }
 
-    const { isAuthenticated, checkAuth } = useAuthStore(state => ({
-        isAuthenticated: state.isAuthenticated,
-        checkAuth: state.checkAuth,
-    }));
+    // const { isAuthenticated, checkAuth } = useAuthStore(state => ({
+    //     isAuthenticated: state.isAuthenticated,
+    //     checkAuth: state.checkAuth,
+    // }));
 
     useEffect(() => {
 
-        checkAuth();
+        // checkAuth();
 
         const saveColorsJson = async () => {
             const fileUri = FileSystem.documentDirectory + 'data.json';
@@ -594,6 +621,12 @@ export default function App() {
 
         }
 
+        function loadEGS() {
+            useEGSStore.getState().initializeEpicGamesServiesAuthorzation()
+            
+        }
+
+        loadEGS()
         saveColorsJson()
         loadLanguage()
     }, [])
@@ -619,7 +652,7 @@ export default function App() {
         },
     }
 
-    return isAuthenticated ? (
+    return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
             <PortalProvider>
@@ -629,39 +662,41 @@ export default function App() {
             </PortalProvider>
         </GestureHandlerRootView>
 
-    ) : (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
-            <PortalProvider>
-                <NavigationContainer theme={theme}>
-                    <Stack.Navigator
-                        screenOptions={{
-                            headerShown: false
-                        }}>
-
-                        <Stack.Screen
-                            name="getStarted"
-                            component={getStartedScreen}
-
-                        />
-
-                        <Stack.Screen
-                            name="LoginScreen"
-                            component={LoginScreen}
-                            options={{ title: "Login" }}
-
-                        />
-
-                        <Stack.Screen
-                            name="CreateAccountScreen"
-                            component={CreateAccountScreen}
-
-                        />
-
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </PortalProvider>
-        </GestureHandlerRootView>
-
     )
+
+    // (
+    //     <GestureHandlerRootView style={{ flex: 1 }}>
+    //         <StatusBar hidden={false} translucent={true} backgroundColor="transparent" barStyle="light-content" />
+    //         <PortalProvider>
+    //             <NavigationContainer theme={theme}>
+    //                 <Stack.Navigator
+    //                     screenOptions={{
+    //                         headerShown: false
+    //                     }}>
+
+    //                     <Stack.Screen
+    //                         name="getStarted"
+    //                         component={getStartedScreen}
+
+    //                     />
+
+    //                     <Stack.Screen
+    //                         name="LoginScreen"
+    //                         component={LoginScreen}
+    //                         options={{ title: "Login" }}
+
+    //                     />
+
+    //                     <Stack.Screen
+    //                         name="CreateAccountScreen"
+    //                         component={CreateAccountScreen}
+
+    //                     />
+
+    //                 </Stack.Navigator>
+    //             </NavigationContainer>
+    //         </PortalProvider>
+    //     </GestureHandlerRootView>
+
+    // )
 }
